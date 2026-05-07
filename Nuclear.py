@@ -10,19 +10,19 @@ class Reactor:
         self.base_temperature = initial_temperature
         self.heat_factor = 500  # How much temperature increases per unit of rod withdrawal
 
-    def raise_rod(self, rod_index):
+    def raise_rod(self, rod_index, raise_amount):
         """Raise (withdraw) a control rod to increase reactivity"""
         if 0 <= rod_index < self.num_rods:
             if self.rods[rod_index] < self.max_rod_depth:
-                self.rods[rod_index] += 10
+                self.rods[rod_index] += raise_amount
                 self.update_temperature()
                 print(f"Rod {rod_index} raised to depth {self.rods[rod_index]}")
 
-    def lower_rod(self, rod_index):
+    def lower_rod(self, rod_index, lower_amount):
         """Lower (insert) a control rod to decrease reactivity"""
         if 0 <= rod_index < self.num_rods:
             if self.rods[rod_index] > 0:
-                self.rods[rod_index] -= 10
+                self.rods[rod_index] -= lower_amount
                 self.update_temperature()
                 print(f"Rod {rod_index} lowered to depth {self.rods[rod_index]}")
 
@@ -51,15 +51,16 @@ class Reactor:
             time.sleep(1)
         print("Simulation ended.")
 
-# Example usage
 if __name__ == "__main__":
     reactor = Reactor()
     print("Initial status:", reactor.get_status())
     
-    # Raise some rods
-    reactor.raise_rod(0)
-    reactor.raise_rod(1)
+    reactor.raise_rod(0, 0)
+    reactor.raise_rod(1, 0)
+    reactor.raise_rod(2, 0)
+    reactor.raise_rod(3, 0)   
+    reactor.raise_rod(4, 0)
+
     print("After raising rods:", reactor.get_status())
     
-    # Run a short simulation
-    reactor.run_simulation(5)
+    reactor.run_simulation(10)
