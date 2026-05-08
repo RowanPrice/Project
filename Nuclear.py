@@ -1,8 +1,25 @@
 import time
 import random
+import os
+os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "hide"
+import pygame
+from pygame.locals import (
+    K_0,
+    K_1,
+    K_2,
+    K_3,
+    K_4,
+    K_5,
+    K_UP,
+    K_DOWN,
+    KEYDOWN,
+    QUIT,
+)
+
 
 class Reactor:
     def __init__(self, initial_temperature=20, num_rods=5, max_rod_depth=100):
+        pygame.init()
         self.temperature = initial_temperature
         self.rods = [0] * num_rods  # 0 = fully inserted, max_rod_depth = fully withdrawn
         self.max_rod_depth = max_rod_depth
@@ -11,7 +28,7 @@ class Reactor:
         self.heat_factor = 500  # How much temperature increases per unit of rod withdrawal
 
     def raise_rod(self, rod_index, raise_amount):
-        """Raise (withdraw) a control rod to increase reactivity"""
+        """Raise a rod to increase reactivity"""
         if 0 <= rod_index < self.num_rods:
             if self.rods[rod_index] < self.max_rod_depth:
                 self.rods[rod_index] += raise_amount
@@ -19,7 +36,7 @@ class Reactor:
                 print(f"Rod {rod_index} raised to depth {self.rods[rod_index]}")
 
     def lower_rod(self, rod_index, lower_amount):
-        """Lower (insert) a control rod to decrease reactivity"""
+        """Lower a rod to decrease reactivity"""
         if 0 <= rod_index < self.num_rods:
             if self.rods[rod_index] > 0:
                 self.rods[rod_index] -= lower_amount
@@ -34,7 +51,7 @@ class Reactor:
         self.temperature += random.uniform(-5, 5)
 
     def get_status(self):
-        """Get current reactor status"""
+        """Get reactor status"""
         return {
             'temperature': round(self.temperature, 1),
             'rods': self.rods.copy(),
@@ -42,6 +59,7 @@ class Reactor:
         }
 
     def run_simulation(self, duration_seconds=10):
+        current_rod = 0
         print("Starting reactor simulation...")
         start_time = time.time()
         while time.time() - start_time < duration_seconds:
@@ -49,6 +67,26 @@ class Reactor:
             status = self.get_status()
             print(f"Temperature: {status['temperature']}°C, Average rod depth: {status['average_rod_depth']}")
             time.sleep(1)
+            for event in pygame.event.get():
+                if event.type == KEYDOWN and event.key == K_0:
+                    current_rod = 0
+                elif event.type == KEYDOWN and event.key == K_1:
+                    current_rod = 1
+                elif event.type == KEYDOWN and event.key == K_2:
+                    current_rod = 2
+                elif event.type == KEYDOWN and event.key == K_3:
+                    current_rod = 3
+                elif event.type == KEYDOWN and event.key == K_4:
+                    current_rod = 4
+                elif event.type == KEYDOWN and event.key == K_5:
+                    current_rod = 5
+                if event.type == KEYDOWN and event.key == K_UP:
+                    reactor.raise_rod(current_rod, 10)
+                elif event.type == KEYDOWN and event.key == K_DOWN:
+                    reactor.raise_rod(current_rod, -10)
+
+
+
         print("Simulation ended.")
 
 if __name__ == "__main__":
@@ -63,4 +101,4 @@ if __name__ == "__main__":
 
     print("After raising rods:", reactor.get_status())
     
-    reactor.run_simulation(10)
+    reactor.run_simulation(7)
