@@ -30,18 +30,24 @@ class Reactor:
     def raise_rod(self, rod_index, raise_amount):
         """Raise a rod to increase reactivity"""
         if 0 <= rod_index < self.num_rods:
-            if self.rods[rod_index] < self.max_rod_depth:
+            if self.rods[rod_index]+raise_amount <= self.max_rod_depth:
                 self.rods[rod_index] += raise_amount
                 self.update_temperature()
                 print(f"Rod {rod_index} raised to depth {self.rods[rod_index]}")
+            else:
+                self.rods[rod_index] = self.max_rod_depth
+                print(f"Rod {rod_index} raised to depth {self.max_rod_depth}")
 
     def lower_rod(self, rod_index, lower_amount):
         """Lower a rod to decrease reactivity"""
-        if 0 <= rod_index < self.num_rods:
-            if self.rods[rod_index] > 0:
+        if 0 <= rod_index and rod_index < self.num_rods:
+            if self.rods[rod_index]-lower_amount >= 0:
                 self.rods[rod_index] -= lower_amount
                 self.update_temperature()
                 print(f"Rod {rod_index} lowered to depth {self.rods[rod_index]}")
+            else:
+                self.rods[rod_index] = 0
+                print(f"Rod {rod_index} lowered to depth 0")
 
     def update_temperature(self):
         """Update core temperature based on average rod position"""
@@ -51,7 +57,6 @@ class Reactor:
         self.temperature += random.uniform(-5, 5)
 
     def get_status(self):
-        """Get reactor status"""
         return {
             'temperature': round(self.temperature, 1),
             'rods': self.rods.copy(),
@@ -93,11 +98,12 @@ if __name__ == "__main__":
     reactor = Reactor()
     print("Initial status:", reactor.get_status())
     
-    reactor.raise_rod(0, 0)
-    reactor.raise_rod(1, 0)
-    reactor.raise_rod(2, 0)
-    reactor.raise_rod(3, 0)   
-    reactor.raise_rod(4, 0)
+    reactor.raise_rod(0, 20)
+    reactor.raise_rod(1, 40)
+    reactor.raise_rod(2, 60)
+    reactor.raise_rod(3, 100)
+    reactor.raise_rod(4, 101)
+    reactor.lower_rod(2, 1000)
 
     print("After raising rods:", reactor.get_status())
     
