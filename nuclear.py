@@ -10,3 +10,4 @@ class Reactor:
         self.cold_shutdown_temperature = cold_shutdown_temperature
         self.meltdown_temperature = meltdown_temperature
         self.heat_factor = 1000 # How much temperature increases per unit of rod withdrawal
+        self.current_rod = 0

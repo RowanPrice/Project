@@ -25,8 +25,9 @@ class Game:
     def auto_scram(self):
         print('Reactor temperature exceeded safe limits. Auto scram initiated')
         time.sleep(1)
-        for i in self.game.rods:
+        for i in range(len(self.game.rods)):
             self.lower_rod(i, self.game.max_rod_depth)
+            time.sleep(0.3)
 
     def raise_rod(self, rod_index, raise_amount):
         """Raise a rod to increase reactivity"""
