@@ -29,7 +29,7 @@ class GameGUI:
 
         self.game = Game()
         self.screen = pygame.display.set_mode([1200,750])
-        self.background =
+        #self.background =
 
 
         self.running = True
@@ -53,17 +53,17 @@ class GameGUI:
             if event.type == KEYDOWN and event.key in [K_0, K_1, K_2, K_3, K_4, K_5, K_6, K_7, K_8, K_9]:
                 for key in [K_0, K_1, K_2, K_3, K_4, K_5, K_6, K_7, K_8, K_9]:
                     if key == event.key:
-                        if key_count <= self.game.game.num_rods:
-                            self.game.game.current_rod = key_count
+                        if key_count <= self.game.reactor.num_rods:
+                            self.game.reactor.current_rod = key_count
                     key_count += 1
-            elif event.type == KEYDOWN and event.key == K_RIGHT and (self.game.game.current_rod+1) <= self.game.game.num_rods-1:
-                self.game.game.current_rod += 1
-            elif event.type == KEYDOWN and event.key == K_LEFT and (self.game.game.current_rod-1) >= 0:
-                self.game.game.current_rod -= 1
+            elif event.type == KEYDOWN and event.key == K_RIGHT and (self.game.reactor.current_rod+1) <= self.game.reactor.num_rods-1:
+                self.game.reactor.current_rod += 1
+            elif event.type == KEYDOWN and event.key == K_LEFT and (self.game.reactor.current_rod-1) >= 0:
+                self.game.reactor.current_rod -= 1
             elif event.type == KEYDOWN and event.key == K_UP:
-                self.game.raise_rod(self.game.game.current_rod, 10)
+                self.game.raise_rod(self.game.reactor.current_rod, 10)
             elif event.type == KEYDOWN and event.key == K_DOWN:
-                self.game.lower_rod(self.game.game.current_rod, 10)
+                self.game.lower_rod(self.game.reactor.current_rod, 10)
 
     def draw(self):
         self.draw_reactor()
