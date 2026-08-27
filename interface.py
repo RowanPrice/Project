@@ -19,6 +19,7 @@ from pygame.locals import (
     KEYDOWN,
     QUIT,
     FULLSCREEN,
+    K_ESCAPE
 )
 
 class GameGUI:
@@ -64,6 +65,10 @@ class GameGUI:
                 self.game.raise_rod(self.game.reactor.current_rod, 10)
             elif event.type == KEYDOWN and event.key == K_DOWN:
                 self.game.lower_rod(self.game.reactor.current_rod, 10)
+            elif event.type == KEYDOWN and event.key == K_9:
+                self.game.scram()
+            elif event.type == KEYDOWN and event.key == K_ESCAPE:
+                self.running = False
 
     def draw(self):
         self.draw_reactor()
