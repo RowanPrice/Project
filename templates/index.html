@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Reactor Control Room</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <header class="topbar">
+        <div>
+            <p class="eyebrow">FACILITY CONTROL</p>
+            <h1>Reactor Control Room</h1>
+        </div>
+        <div class="money">£{{ "{:,}".format(data.money) }}</div>
+    </header>
+
+    <main>
+        {% if data.mode != 'map' %}
+        <nav class="mode-tabs building-nav">
+            <form action="{{ url_for('return_to_map') }}" method="post">
+                <button class="mode-button">Back to Map</button>
+            </form>
+            <form action="{{ url_for('set_mode', mode='power_plant') }}" method="post">
+                <button class="mode-button {% if data.mode == 'power_plant' %}active{% endif %}">Power Plant</button>
+            </form>
+            <form action="{{ url_for('set_mode', mode='science_centre') }}" method="post">
+                <button class="mode-button {% if data.mode == 'science_centre' %}active{% endif %}">Science Centre</button>
+            </form>
+        </nav>
+        {% endif %}
+
+        {% if data.mode == 'map' %}
+        <section class="map-screen">
+            <div class="section-heading">
+                <div>
+                    <p class="eyebrow">FACILITY OVERVIEW</p>
+                    <h2>Site Map</h2>
+                </div>
+                <span class="status-pill">5 BUILDINGS</span>
+            </div>
+            <div class="building-grid">
+                <form class="building-card operational" action="{{ url_for('enter_building', building='power_plant') }}" method="post">
+                    <button>
+                        <span class="building-number">01</span>
+                        <span class="building-icon">▦</span>
+                        <strong>Power Plant</strong>
+                        <small>Reactor operations and control rods</small>
+                        <em>Enter building →</em>
+                    </button>
+                </form>
+                <form class="building-card research" action="{{ url_for('enter_building', building='science_centre') }}" method="post">
+                    <button>
+                        <span class="building-number">02</span>
+                        <span class="building-icon">◇</span>
+                        <strong>Science Centre</strong>
+                        <small>Fuel enrichment and upgrades</small>
+                        <em>Enter building →</em>
+                    </button>
+                </form>
+                {% for number in [3, 4, 5] %}
+                <div class="building-card locked">
+                    <div>
+                        <span class="building-number">0{{ number }}</span>
+                        <span class="building-icon">+</span>
+                        <strong>Building {{ number }}</strong>
+                        <small>Available for development</small>
+                        <em>Coming soon</em>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+        {% elif data.mode == 'power_plant' %}
+        <section class="workspace">
+            <div class="section-heading">
+                <div>
+                    <p class="eyebrow">OPERATIONS</p>
+                    <h2>Power Plant</h2>
+                </div>
+                <span class="status-pill {% if not data.power_plant_on %}offline{% endif %}">{% if data.power_plant_on %}ONLINE{% else %}OFFLINE{% endif %}</span>
+            </div>
+            <form action="{{ url_for('return_to_map') }}" method="post"><button class="back-button">← Back to Map</button></form>
+            <form class="plant-toggle-form" action="{{ url_for('reactor_action', action='toggle') }}" method="post"><button class="plant-toggle {% if data.power_plant_on %}turn-off{% endif %}">{% if data.power_plant_on %}Turn Power Plant Off{% else %}Turn Power Plant On{% endif %}</button></form>
+            <div class="metric-grid {% if not data.power_plant_on %}plant-off-state{% endif %}">
+                <article class="metric-card">
+                    <span>Core temperature</span>
+                    <strong id="temperature">{{ data.reactor.temperature }}°C</strong>
+                </article>
+                <article class="metric-card">
+                    <span>Average rod depth</span>
+                    <strong id="rod-depth">{{ data.reactor.average_rod_depth }}</strong>
+                </article>
+                <article class="metric-card">
+                    <span>Battery</span>
+                    <strong>{{ data.battery.charge }}/{{ data.battery.capacity }}</strong>
+                </article>
+            </div>
+            <div class="control-panel">
+                <div class="panel-heading">
+                    <h3>Control rods</h3>
+                    <span id="selected-rod-count">Select rods below</span>
+                </div>
+                <div class="rod-control-area">
+                    <div class="rod-list">
+                    {% for rod in data.reactor.rods %}
+                    <div class="rod-column">
+                        <button type="button" class="rod-select-button" data-rod="{{ loop.index0 }}" {% if not data.power_plant_on %}disabled{% endif %}>Rod {{ loop.index }}</button>
+                        <div class="rod-track"><i id="rod-bar-{{ loop.index0 }}" style="height: {{ rod }}%"></i></div>
+                    </div>
+                    {% endfor %}
+                    </div>
+                    <form id="rod-controls" class="rod-controls" method="post">
+                        <button type="button" class="hold-control raise-control" data-action="raise" aria-label="Hold to raise selected rods" {% if not data.power_plant_on %}disabled{% endif %}><span class="triangle triangle-up"></span></button>
+                        <button type="button" class="hold-control lower-control" data-action="lower" aria-label="Hold to lower selected rods" {% if not data.power_plant_on %}disabled{% endif %}><span class="triangle triangle-down"></span></button>
+                    </form>
+                </div>
+                <form class="scram-form" action="{{ url_for('reactor_action', action='scram') }}" method="post"><button class="danger-button">Emergency SCRAM</button></form>
+            </div>
+        </section>
+        {% else %}
+        <section class="workspace">
+            <div class="section-heading">
+                <div>
+                    <p class="eyebrow">RESEARCH AND DEVELOPMENT</p>
+                    <h2>Science Centre</h2>
+                </div>
+                <span class="status-pill">ONLINE</span>
+            </div>
+            <form action="{{ url_for('return_to_map') }}" method="post"><button class="back-button">← Back to Map</button></form>
+            <div class="science-tabs">
+                <button class="science-tab active" data-tab="enrichment-panel">Enrichment</button>
+                <button class="science-tab" data-tab="upgrades-panel">Purchase Upgrades</button>
+            </div>
+
+            <section id="enrichment-panel" class="science-panel">
+                <div class="enrichment-layout">
+                    <div class="enrichment-controls">
+                        <div class="fuel-balances">
+                            <div><span>Enriched fuel</span><strong id="enriched-fuel">{{ data.science.enriched_fuel }}</strong></div>
+                            <div class="fuel-buy-line"><span>Unenriched fuel</span><strong id="unenriched-fuel">{{ data.science.unenriched_fuel }}</strong><button type="button" class="plus-button" id="open-fuel-shop">+</button></div>
+                        </div>
+                        <div class="metrics-list">
+                            <p>Enrichment level <b>{{ "%.2f"|format(data.science.enrichment_level) }}%</b></p>
+                            <p>Centrifuge quality <b>Level {{ data.science.quality_level }} · {{ data.science.enrichment_multiplier }}x</b></p>
+                            <p>Centrifuge speed <b>Level {{ data.science.speed_level }} · {{ data.science.speed_multiplier }}x</b></p>
+                        </div>
+                        <form class="enrichment-form" action="{{ url_for('start_enrichment') }}" method="post">
+                            <label for="fuel-amount">Fuel to enrich</label>
+                            <div class="amount-row"><input id="fuel-amount" name="amount" type="number" min="0" max="{{ data.science.unenriched_fuel }}" value="{{ [100, data.science.unenriched_fuel]|min }}" required><span>units</span></div>
+                            <label for="enrichment-percentage">Target enrichment</label>
+                            <div class="amount-row"><input id="enrichment-percentage" name="percentage" type="number" min="0" max="20" step="0.1" value="4.5" required><span>%</span></div>
+                            <button class="primary-button" {% if data.science.unenriched_fuel == 0 or data.science.enrichment.in_progress %}disabled{% endif %}>Start Enrichment</button>
+                        </form>
+                        <div class="progress-area">
+                            <div class="progress-label"><span>Progress</span><b id="progress-value">{{ "%.1f"|format(data.science.enrichment.progress * 100) }}%</b></div>
+                            <div class="progress-track"><i id="progress-bar" style="width: {{ data.science.enrichment.progress * 100 }}%"></i></div>
+                            <p id="time-left">{% if data.science.enrichment.in_progress %}{{ "%.0f"|format(data.science.enrichment.time_left) }} seconds remaining{% else %}Ready for a new batch{% endif %}</p>
+                        </div>
+                    </div>
+                    <div class="sprite-placeholder"><span>CENTRIFUGE SPRITE<br>PLACEHOLDER</span></div>
+                </div>
+                <button type="button" class="dev-button" id="skip-enrichment">DEV: Skip wait</button>
+            </section>
+
+            <section id="upgrades-panel" class="science-panel hidden">
+                <div class="upgrade-table">
+                    <div class="upgrade-header"><span>Category</span><span>Upgrade</span><span>Effect</span><span>Cost</span><span></span></div>
+                    {% for category, upgrades in data.science.upgrades.items() %}
+                        {% for name, upgrade in upgrades.items() %}
+                        <div class="upgrade-row" data-upgrade-category="{{ category }}" data-upgrade-name="{{ name }}"><span>{{ category }}</span><strong>{{ name }}</strong><span>{{ upgrade.effect }}</span><span>£{{ "{:,}".format(upgrade.cost) }}</span><form class="upgrade-form" action="{{ url_for('purchase_upgrade') }}" method="post"><input type="hidden" name="category" value="{{ category }}"><input type="hidden" name="name" value="{{ name }}"><button class="small-button" {% if upgrade.purchased or data.money < upgrade.cost %}disabled{% endif %}>{% if upgrade.purchased %}Purchased{% elif data.money < upgrade.cost %}Not enough money{% else %}Purchase{% endif %}</button></form></div>
+                        {% endfor %}
+                    {% endfor %}
+                </div>
+            </section>
+        </section>
+        {% endif %}
+    </main>
+
+    <dialog id="fuel-shop">
+        <form action="{{ url_for('buy_fuel') }}" method="post" class="shop-dialog">
+            <button type="button" class="close-button" id="close-fuel-shop">×</button>
+            <p class="eyebrow">SUPPLY DEPOT</p><h2>Buy Unenriched Fuel</h2>
+            <label for="buy-amount">Amount</label><input id="buy-amount" name="amount" type="number" min="1" value="100" required>
+            <p class="cost-line">Cost: £<span id="fuel-cost">1,000</span></p>
+            <button class="primary-button">Buy Fuel</button>
+        </form>
+    </dialog>
+    <script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>
