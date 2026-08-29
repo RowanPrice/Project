@@ -27,6 +27,12 @@
             <form action="{{ url_for('set_mode', mode='science_centre') }}" method="post">
                 <button class="mode-button {% if data.mode == 'science_centre' %}active{% endif %}">Science Centre</button>
             </form>
+            <form action="{{ url_for('set_mode', mode='battery') }}" method="post">
+                <button class="mode-button {% if data.mode == 'battery' %}active{% endif %}">Battery</button>
+            </form>
+            <form action="{{ url_for('set_mode', mode='administration') }}" method="post">
+                <button class="mode-button {% if data.mode == 'administration' %}active{% endif %}">Administrative Building</button>
+            </form>
         </nav>
         {% endif %}
 
@@ -58,7 +64,35 @@
                         <em>Enter building →</em>
                     </button>
                 </form>
-                {% for number in [3, 4, 5] %}
+                <form class="building-card energy" action="{{ url_for('enter_building', building='battery') }}" method="post">
+                    <button>
+                        <span class="building-number">03</span>
+                        <span class="building-icon">▥</span>
+                        <strong>Battery</strong>
+                        <small>Energy storage and power flow</small>
+                        <em>Enter building →</em>
+                    </button>
+                </form>
+                <form class="building-card administration" action="{{ url_for('enter_building', building='administration') }}" method="post">
+                    <button>
+                        <span class="building-number">04</span>
+                        <span class="building-icon">▤</span>
+                        <strong>Administrative Building</strong>
+                        <small>Contracts and staffing</small>
+                        <em>Enter building →</em>
+                    </button>
+                </form>
+                <div class="building-card locked">
+                    <div>
+                        <span class="building-number">05</span>
+                        <span class="building-icon">+</span>
+                        <strong>Building 5</strong>
+                        <small>Available for development</small>
+                        <em>Coming soon</em>
+                    </div>
+                </div>
+                {% if false %}
+                {% for number in [4, 5] %}
                 <div class="building-card locked">
                     <div>
                         <span class="building-number">0{{ number }}</span>
@@ -69,6 +103,7 @@
                     </div>
                 </div>
                 {% endfor %}
+                {% endif %}
             </div>
         </section>
         {% elif data.mode == 'power_plant' %}
@@ -78,10 +113,9 @@
                     <p class="eyebrow">OPERATIONS</p>
                     <h2>Power Plant</h2>
                 </div>
-                <span class="status-pill {% if not data.power_plant_on %}offline{% endif %}">{% if data.power_plant_on %}ONLINE{% else %}OFFLINE{% endif %}</span>
+                <span id="plant-status" class="status-pill {% if not data.power_plant_on %}offline{% endif %}">{% if data.power_plant_on %}ONLINE{% else %}OFFLINE{% endif %}</span>
             </div>
             <form action="{{ url_for('return_to_map') }}" method="post"><button class="back-button">← Back to Map</button></form>
-            <form class="plant-toggle-form" action="{{ url_for('reactor_action', action='toggle') }}" method="post"><button class="plant-toggle {% if data.power_plant_on %}turn-off{% endif %}">{% if data.power_plant_on %}Turn Power Plant Off{% else %}Turn Power Plant On{% endif %}</button></form>
             <div class="metric-grid {% if not data.power_plant_on %}plant-off-state{% endif %}">
                 <article class="metric-card">
                     <span>Core temperature</span>
@@ -115,10 +149,13 @@
                         <button type="button" class="hold-control lower-control" data-action="lower" aria-label="Hold to lower selected rods" {% if not data.power_plant_on %}disabled{% endif %}><span class="triangle triangle-down"></span></button>
                     </form>
                 </div>
-                <form class="scram-form" action="{{ url_for('reactor_action', action='scram') }}" method="post"><button class="danger-button">Emergency SCRAM</button></form>
+                <div class="bottom-controls">
+                    <form id="reactor-toggle-form" class="reactor-toggle-form" action="{{ url_for('reactor_action', action='toggle') }}" method="post"><button id="reactor-toggle" class="reactor-toggle {% if data.power_plant_on %}on{% endif %}">Reactor</button></form>
+                    <form class="no-refresh-form scram-form" action="{{ url_for('reactor_action', action='scram') }}" method="post"><button class="danger-button">Emergency SCRAM</button></form>
+                </div>
             </div>
         </section>
-        {% else %}
+        {% elif data.mode == 'science_centre' %}
         <section class="workspace">
             <div class="section-heading">
                 <div>
@@ -145,7 +182,7 @@
                             <p>Centrifuge quality <b>Level {{ data.science.quality_level }} · {{ data.science.enrichment_multiplier }}x</b></p>
                             <p>Centrifuge speed <b>Level {{ data.science.speed_level }} · {{ data.science.speed_multiplier }}x</b></p>
                         </div>
-                        <form class="enrichment-form" action="{{ url_for('start_enrichment') }}" method="post">
+                        <form class="enrichment-form no-refresh-form" action="{{ url_for('start_enrichment') }}" method="post">
                             <label for="fuel-amount">Fuel to enrich</label>
                             <div class="amount-row"><input id="fuel-amount" name="amount" type="number" min="0" max="{{ data.science.unenriched_fuel }}" value="{{ [100, data.science.unenriched_fuel]|min }}" required><span>units</span></div>
                             <label for="enrichment-percentage">Target enrichment</label>
@@ -174,11 +211,81 @@
                 </div>
             </section>
         </section>
+        {% elif data.mode == 'battery' %}
+        <section id="battery-screen" class="battery-screen" data-no-zap="{{ url_for('battery_image', filename='Battery_no_zap.svg') }}" data-zap="{{ url_for('battery_image', filename='Battery_zap.svg') }}" style="--battery-image: url('{{ url_for('battery_image', filename='Battery_no_zap.svg') }}');">
+            <div class="battery-screen-header">
+                <div>
+                    <p class="eyebrow">ENERGY STORAGE</p>
+                    <h2>Battery</h2>
+                </div>
+                <span class="status-pill">ONLINE</span>
+            </div>
+            <form action="{{ url_for('return_to_map') }}" method="post"><button class="back-button battery-back">← Back to Map</button></form>
+            <div class="battery-panel">
+                <p class="eyebrow">BATTERY OUTPUT</p>
+                <div class="battery-charge" id="battery-charge">{{ "{:,.0f}".format(data.battery.charge) }} W</div>
+                <div class="battery-capacity">of {{ "{:,.0f}".format(data.battery.capacity) }} W capacity</div>
+                <div class="battery-meter"><i id="battery-meter-fill" style="width: {{ (data.battery.charge / data.battery.capacity * 100) if data.battery.capacity else 0 }}%"></i></div>
+                <div class="battery-rates">
+                    <div><span>Max charging rate</span><strong>{{ "{:,.0f}".format(data.battery.max_charge_rate) }} W</strong></div>
+                    <div><span>Max discharging rate</span><strong>{{ "{:,.0f}".format(data.battery.max_discharge_rate) }} W</strong></div>
+                </div>
+                <div class="battery-actions">
+                    <form class="no-refresh-form" action="{{ url_for('battery_action', action='charging') }}" method="post"><button class="battery-button charge-button">Charge</button></form>
+                    <form class="no-refresh-form" action="{{ url_for('battery_action', action='discharging') }}" method="post"><button class="battery-button discharge-button">Discharge</button></form>
+                    <form class="no-refresh-form" action="{{ url_for('battery_action', action='stop') }}" method="post"><button class="battery-button stop-button">Stop</button></form>
+                </div>
+                <p class="battery-mode" id="battery-mode">{% if data.battery.mode %}{{ data.battery.mode|capitalize }}{% else %}Idle{% endif %}</p>
+            </div>
+        </section>
+        {% else %}
+        <section class="workspace administration-workspace">
+            <div class="section-heading">
+                <div>
+                    <p class="eyebrow">FACILITY MANAGEMENT</p>
+                    <h2>Administrative Building</h2>
+                </div>
+                <span class="status-pill">ONLINE</span>
+            </div>
+            <form action="{{ url_for('return_to_map') }}" method="post"><button class="back-button">← Back to Map</button></form>
+            <div class="science-tabs administration-tabs">
+                <button class="science-tab active" data-tab="contracts-panel">Contracts</button>
+                <button class="science-tab" data-tab="hiring-panel">Hiring</button>
+            </div>
+            <section id="contracts-panel" class="science-panel">
+                <div class="contract-list">
+                    {% for contract in data.administration.contracts %}
+                    <article class="contract-row">
+                        <div><p class="eyebrow">CONTRACT {{ "%02d"|format(loop.index) }}</p><h3>{{ contract.title }}</h3><p>{{ contract.description }}</p></div>
+                        <strong>£{{ "%.2f"|format(contract.pay_per_watt) }} / W<br><small>{{ "{:,.0f}".format(contract.total_power_required) }} MW · {{ contract.time_to_complete }} min</small></strong>
+                        <button type="button" class="primary-button contract-info-button" data-contract="{{ loop.index0 }}" data-active="{{ data.administration.active_contract == loop.index0 }}" data-title="{{ contract.title }}" data-pay="£{{ "%.2f"|format(contract.pay_per_watt) }} per watt" data-power="{{ "{:,.0f}".format(contract.total_power_required) }} MW total power required" data-time="{{ contract.time_to_complete }} minutes to complete" data-description="{{ contract.description }}">Info</button>
+                    </article>
+                    {% endfor %}
+                </div>
+            </section>
+            <section id="hiring-panel" class="science-panel hidden"></section>
+        </section>
         {% endif %}
     </main>
 
+    <dialog id="contract-info-dialog">
+        <div class="shop-dialog contract-dialog">
+            <button type="button" class="close-button" id="close-contract-info">×</button>
+            <p class="eyebrow">CONTRACT DETAILS</p>
+            <h2 id="contract-info-title"></h2>
+            <p class="contract-info-pay" id="contract-info-pay"></p>
+            <p class="contract-info-power" id="contract-info-power"></p>
+            <p class="contract-info-time" id="contract-info-time"></p>
+            <p class="contract-info-description" id="contract-info-description"></p>
+            <form id="contract-start-form" class="contract-start-form" action="{{ url_for('start_contract') }}" method="post">
+                <input id="contract-info-index" type="hidden" name="contract" value="">
+                <button id="contract-start-button" class="primary-button">Start Contract</button>
+            </form>
+        </div>
+    </dialog>
+
     <dialog id="fuel-shop">
-        <form action="{{ url_for('buy_fuel') }}" method="post" class="shop-dialog">
+        <form action="{{ url_for('buy_fuel') }}" method="post" class="shop-dialog no-refresh-form">
             <button type="button" class="close-button" id="close-fuel-shop">×</button>
             <p class="eyebrow">SUPPLY DEPOT</p><h2>Buy Unenriched Fuel</h2>
             <label for="buy-amount">Amount</label><input id="buy-amount" name="amount" type="number" min="1" value="100" required>

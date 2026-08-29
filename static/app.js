@@ -3,11 +3,44 @@ const openShop = document.getElementById('open-fuel-shop');
 const closeShop = document.getElementById('close-fuel-shop');
 const buyAmount = document.getElementById('buy-amount');
 const fuelCost = document.getElementById('fuel-cost');
+const contractInfoDialog = document.getElementById('contract-info-dialog');
+const closeContractInfo = document.getElementById('close-contract-info');
+const contractStartForm = document.getElementById('contract-start-form');
 
 if (openShop) openShop.addEventListener('click', () => shop.showModal());
 if (closeShop) closeShop.addEventListener('click', () => shop.close());
 if (buyAmount) buyAmount.addEventListener('input', () => {
     fuelCost.textContent = (Number(buyAmount.value || 0) * 10).toLocaleString();
+});
+if (closeContractInfo) closeContractInfo.addEventListener('click', () => contractInfoDialog.close());
+document.querySelectorAll('.contract-info-button').forEach((button) => {
+    button.addEventListener('click', () => {
+        document.getElementById('contract-info-title').textContent = button.dataset.title;
+        document.getElementById('contract-info-pay').textContent = button.dataset.pay;
+        document.getElementById('contract-info-power').textContent = button.dataset.power;
+        document.getElementById('contract-info-time').textContent = button.dataset.time;
+        document.getElementById('contract-info-description').textContent = button.dataset.description;
+        document.getElementById('contract-info-index').value = button.dataset.contract;
+        const startButton = document.getElementById('contract-start-button');
+        startButton.disabled = button.dataset.active === 'true';
+        startButton.textContent = button.dataset.active === 'true' ? 'Active Contract' : 'Start Contract';
+        contractInfoDialog.showModal();
+    });
+});
+
+if (contractStartForm) contractStartForm.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const response = await fetch(contractStartForm.action, {
+        method: 'POST',
+        body: new FormData(contractStartForm),
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    });
+    if (!response.ok) return;
+    const data = await response.json();
+    updateMoney(data);
+    const startButton = document.getElementById('contract-start-button');
+    startButton.disabled = true;
+    startButton.textContent = 'Active Contract';
 });
 
 document.querySelectorAll('.science-tab').forEach((button) => {
@@ -62,6 +95,53 @@ document.querySelectorAll('.upgrade-form').forEach((form) => {
         event.preventDefault();
         postWithoutRefresh(form);
     });
+});
+
+document.querySelectorAll('.no-refresh-form').forEach((form) => {
+    form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const response = await fetch(form.action, {
+            method: 'POST',
+            body: new FormData(form),
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        });
+        if (response.ok) await refreshState();
+    });
+});
+
+const skipEnrichment = document.getElementById('skip-enrichment');
+if (skipEnrichment) skipEnrichment.addEventListener('click', async () => {
+    const response = await fetch('/science/skip-enrichment', {
+        method: 'POST',
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    });
+    if (response.ok) await refreshState();
+});
+
+const reactorToggleForm = document.getElementById('reactor-toggle-form');
+if (reactorToggleForm) reactorToggleForm.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const response = await fetch(reactorToggleForm.action, {
+        method: 'POST',
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    });
+    if (!response.ok) return;
+    const data = await response.json();
+    const button = document.getElementById('reactor-toggle');
+    const status = document.getElementById('plant-status');
+    if (button) button.classList.toggle('on', data.power_plant_on);
+    document.querySelectorAll('.rod-select-button, .hold-control').forEach((control) => {
+        control.disabled = !data.power_plant_on;
+    });
+    if (!data.power_plant_on) {
+        selectedRods.clear();
+        document.querySelectorAll('.rod-select-button').forEach((rodButton) => rodButton.classList.remove('selected'));
+        updateRodSelection();
+    }
+    if (status) {
+        status.textContent = data.power_plant_on ? 'ONLINE' : 'OFFLINE';
+        status.classList.toggle('offline', !data.power_plant_on);
+    }
 });
 
 const rodControls = document.getElementById('rod-controls');
@@ -131,6 +211,18 @@ async function refreshState() {
     if (timeLeft) timeLeft.textContent = enrichment.in_progress ? `${Math.ceil(enrichment.time_left)} seconds remaining` : 'Ready for a new batch';
     if (enrichedFuel) enrichedFuel.textContent = data.science.enriched_fuel;
     if (unenrichedFuel) unenrichedFuel.textContent = data.science.unenriched_fuel;
+    updateReactorDisplay(data);
+    const batteryCharge = document.getElementById('battery-charge');
+    const batteryFill = document.getElementById('battery-meter-fill');
+    const batteryMode = document.getElementById('battery-mode');
+    const batteryScreen = document.getElementById('battery-screen');
+    if (batteryCharge) batteryCharge.textContent = `${Number(data.battery.charge).toLocaleString(undefined, { maximumFractionDigits: 0 })} W`;
+    if (batteryFill) batteryFill.style.width = `${data.battery.capacity ? data.battery.charge / data.battery.capacity * 100 : 0}%`;
+    if (batteryMode) batteryMode.textContent = data.battery.mode ? data.battery.mode : 'Idle';
+    if (batteryScreen) {
+        const image = data.battery.mode ? batteryScreen.dataset.zap : batteryScreen.dataset.noZap;
+        batteryScreen.style.setProperty('--battery-image', `url('${image}')`);
+    }
 }
 
 setInterval(refreshState, 1000);

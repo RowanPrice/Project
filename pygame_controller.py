@@ -8,7 +8,7 @@ class Game:
     def __init__(self):
         self.reactor = Reactor()
         self.power_plant_on = False
-        self.battery = Battery(100, charge_rate=20, discharge_rate=10)
+        self.battery = Battery(1000000, charge_rate=100000, discharge_rate=80000)
         self.science_centre = ScienceCentre()
         self.money = 10000
         self.enrichment_in_progress = False
@@ -17,6 +17,44 @@ class Game:
         self.enrichment_fuel_amount = 0
         self.enrichment_percentage = 0
         self.fuel_price = 10
+        self.active_contract = None
+        self.contracts = [
+            {
+                "title": "National Grid Supply",
+                "pay_per_watt": 0.08,
+                "total_power_required": 500,
+                "time_to_complete": 10,
+                "description": "Supply stable power to the national grid."
+            },
+            {
+                "title": "Industrial Power Agreement",
+                "pay_per_watt": 0.12,
+                "total_power_required": 800,
+                "time_to_complete": 15,
+                "description": "Provide reliable energy for a high-demand industrial site."
+            },
+            {
+                "title": "Emergency Reserve Contract",
+                "pay_per_watt": 0.18,
+                "total_power_required": 400,
+                "time_to_complete": 5,
+                "description": "Keep reserve capacity available for emergency demand."
+            },
+            {
+                "title": "Research Facility Supply",
+                "pay_per_watt": 0.15,
+                "total_power_required": 1500,
+                "time_to_complete": 20,
+                "description": "Provide power to a cutting-edge research facility."
+            },
+            {
+                "title": "Dr Frankenstein's Laboratory",
+                "pay_per_watt": 0.50,
+                "total_power_required": 100,
+                "time_to_complete": 1,
+                "description": "Supply electricity to Dr Frankenstein's laboratory."
+            }
+        ]
 
     # Battery controls
     def select_battery_mode(self, mode):
@@ -216,7 +254,7 @@ class Game:
         average_rod_depth = sum(self.reactor.rods) / self.reactor.num_rods
         reactivity = average_rod_depth / self.reactor.max_rod_depth
         self.reactor.temperature = self.reactor.base_temperature + reactivity * self.reactor.heat_factor
-        self.reactor.temperature += random.uniform(-5, 5)
+        self.reactor.temperature += random.uniform(-2, 2)
         if self.reactor.temperature > self.reactor.auto_scram_temperature and self.reactor.auto_scram == True:
             return(True)
 
