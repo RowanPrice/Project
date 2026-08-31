@@ -2,7 +2,7 @@ import time
 
 from flask import Flask, jsonify, redirect, render_template, request, send_from_directory, url_for
 
-from pygame_controller import Game
+from controller import Game
 
 app = Flask(__name__)
 game = Game()

@@ -1,7 +1,7 @@
 import pygame
 import flask
 import time
-from pygame_controller import Game
+from controller import Game
 from pygame.locals import (
     K_0,
     K_1,
