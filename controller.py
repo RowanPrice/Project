@@ -53,6 +53,13 @@ class Game:
                 "total_power_required": 100,
                 "time_to_complete": 1,
                 "description": "Supply electricity to Dr Frankenstein's laboratory."
+            },
+            {
+                "title": "Larry's Lamps",
+                "pay_per_watt": 0.50,
+                "total_power_required": 700,
+                "time_to_complete": 20,
+                "description": "Supply electricity to a lamp shop."
             }
         ]
 

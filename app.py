@@ -72,7 +72,7 @@ def battery_image(filename):
 @app.post("/building/<building>")
 def enter_building(building):
     global game_mode
-    if building in ("power_plant", "science_centre", "battery", "administration"):
+    if building in ("#power_plant", "#science_centre", "#battery", "#administration"):
         game_mode = building
     return redirect(url_for("index"))
 
