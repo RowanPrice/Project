@@ -1,17 +1,16 @@
-const shop = document.getElementById('fuel-shop');
-const openShop = document.getElementById('open-fuel-shop');
-const closeShop = document.getElementById('close-fuel-shop');
-const buyAmount = document.getElementById('buy-amount');
-const fuelCost = document.getElementById('fuel-cost');
 const contractInfoDialog = document.getElementById('contract-info-dialog');
 const closeContractInfo = document.getElementById('close-contract-info');
 const contractStartForm = document.getElementById('contract-start-form');
+const mapMoney = document.getElementById('map-money');
 
-if (openShop) openShop.addEventListener('click', () => shop.showModal());
-if (closeShop) closeShop.addEventListener('click', () => shop.close());
-if (buyAmount) buyAmount.addEventListener('input', () => {
-    fuelCost.textContent = (Number(buyAmount.value || 0) * 10).toLocaleString();
+if (mapMoney) mapMoney.addEventListener('click', async () => {
+    const response = await fetch('/dev/add-money', {
+        method: 'POST',
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    });
+    if (response.ok) updateMoney(await response.json());
 });
+
 if (closeContractInfo) closeContractInfo.addEventListener('click', () => contractInfoDialog.close());
 document.querySelectorAll('.contract-info-button').forEach((button) => {
     button.addEventListener('click', () => {
@@ -60,8 +59,8 @@ function updateMoney(data) {
 function updateReactorDisplay(data) {
     if (!data.reactor) return;
     data.reactor.rods.forEach((rod, index) => {
-        const bar = document.getElementById(`rod-bar-${index}`);
-        if (bar) bar.style.height = `${rod}%`;
+        const rodValue = document.getElementById(`rod-value-${index}`);
+        if (rodValue) rodValue.textContent = `${rod}/100`;
     });
     const temperature = document.getElementById('temperature');
     const rodDepth = document.getElementById('rod-depth');
@@ -118,41 +117,9 @@ if (skipEnrichment) skipEnrichment.addEventListener('click', async () => {
     if (response.ok) await refreshState();
 });
 
-const reactorToggleForm = document.getElementById('reactor-toggle-form');
-if (reactorToggleForm) reactorToggleForm.addEventListener('submit', async (event) => {
-    event.preventDefault();
-    const response = await fetch(reactorToggleForm.action, {
-        method: 'POST',
-        headers: { 'X-Requested-With': 'XMLHttpRequest' }
-    });
-    if (!response.ok) return;
-    const data = await response.json();
-    const button = document.getElementById('reactor-toggle');
-    const status = document.getElementById('plant-status');
-    if (button) button.classList.toggle('on', data.power_plant_on);
-    document.querySelectorAll('.rod-select-button, .hold-control').forEach((control) => {
-        control.disabled = !data.power_plant_on;
-    });
-    if (!data.power_plant_on) {
-        selectedRods.clear();
-        document.querySelectorAll('.rod-select-button').forEach((rodButton) => rodButton.classList.remove('selected'));
-        updateRodSelection();
-    }
-    if (status) {
-        status.textContent = data.power_plant_on ? 'ONLINE' : 'OFFLINE';
-        status.classList.toggle('offline', !data.power_plant_on);
-    }
-});
-
 const rodControls = document.getElementById('rod-controls');
-const rodSelectionCount = document.getElementById('selected-rod-count');
 const selectedRods = new Set();
 const rodButtons = document.querySelectorAll('.rod-select-button');
-
-function updateRodSelection() {
-    const selected = selectedRods.size;
-    if (rodSelectionCount) rodSelectionCount.textContent = selected ? `${selected} rod${selected === 1 ? '' : 's'} selected` : 'Select rods below';
-}
 
 rodButtons.forEach((button) => button.addEventListener('click', () => {
     const rod = button.dataset.rod;
@@ -163,7 +130,6 @@ rodButtons.forEach((button) => button.addEventListener('click', () => {
         selectedRods.add(rod);
         button.classList.add('selected');
     }
-    updateRodSelection();
 }));
 
 async function moveSelectedRods(action) {
@@ -179,20 +145,10 @@ async function moveSelectedRods(action) {
 }
 
 document.querySelectorAll('.hold-control').forEach((button) => {
-    let holdTimer;
-    const start = (event) => {
+    button.addEventListener('click', (event) => {
         event.preventDefault();
         moveSelectedRods(button.dataset.action);
-        holdTimer = setInterval(() => moveSelectedRods(button.dataset.action), 50);
-    };
-    const stop = () => {
-        clearInterval(holdTimer);
-        holdTimer = undefined;
-    };
-    button.addEventListener('pointerdown', start);
-    button.addEventListener('pointerup', stop);
-    button.addEventListener('pointerleave', stop);
-    button.addEventListener('pointercancel', stop);
+    });
 });
 
 async function refreshState() {
@@ -201,13 +157,11 @@ async function refreshState() {
     const data = await response.json();
     const enrichment = data.science.enrichment;
     const progressValue = document.getElementById('progress-value');
-    const progressBar = document.getElementById('progress-bar');
     const timeLeft = document.getElementById('time-left');
     const enrichedFuel = document.getElementById('enriched-fuel');
     const unenrichedFuel = document.getElementById('unenriched-fuel');
     updateMoney(data);
     if (progressValue) progressValue.textContent = `${(enrichment.progress * 100).toFixed(1)}%`;
-    if (progressBar) progressBar.style.width = `${enrichment.progress * 100}%`;
     if (timeLeft) timeLeft.textContent = enrichment.in_progress ? `${Math.ceil(enrichment.time_left)} seconds remaining` : 'Ready for a new batch';
     if (enrichedFuel) enrichedFuel.textContent = data.science.enriched_fuel;
     if (unenrichedFuel) unenrichedFuel.textContent = data.science.unenriched_fuel;
@@ -216,7 +170,7 @@ async function refreshState() {
     const batteryFill = document.getElementById('battery-meter-fill');
     const batteryMode = document.getElementById('battery-mode');
     const batteryScreen = document.getElementById('battery-screen');
-    if (batteryCharge) batteryCharge.textContent = `${Number(data.battery.charge).toLocaleString(undefined, { maximumFractionDigits: 0 })} W`;
+    if (batteryCharge) batteryCharge.textContent = `${Math.ceil(Number(data.battery.charge)).toLocaleString()} W`;
     if (batteryFill) batteryFill.style.width = `${data.battery.capacity ? data.battery.charge / data.battery.capacity * 100 : 0}%`;
     if (batteryMode) batteryMode.textContent = data.battery.mode ? data.battery.mode : 'Idle';
     if (batteryScreen) {

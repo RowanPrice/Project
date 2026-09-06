@@ -72,7 +72,7 @@ def battery_image(filename):
 @app.post("/building/<building>")
 def enter_building(building):
     global game_mode
-    if building in ("#power_plant", "#science_centre", "#battery", "#administration"):
+    if building in ("power_plant", "science_centre", "battery", "administration"):
         game_mode = building
     return redirect(url_for("index"))
 
@@ -82,6 +82,12 @@ def return_to_map():
     global game_mode
     game_mode = "map"
     return redirect(url_for("index"))
+
+
+@app.post("/dev/add-money")
+def add_dev_money():
+    game.money += 1000
+    return jsonify(state())
 
 
 @app.post("/administration/start-contract")
@@ -144,10 +150,10 @@ def reactor_action(action):
             game.reactor.current_rod = rod_indices[0]
     elif action == "raise":
         for rod_index in rod_indices:
-            game.raise_rod(rod_index, 1)
+            game.raise_rod(rod_index, 5)
     elif action == "lower":
         for rod_index in rod_indices:
-            game.lower_rod(rod_index, 1)
+            game.lower_rod(rod_index, 5)
     elif action == "scram":
         game.auto_scram()
     if request.headers.get("X-Requested-With") == "XMLHttpRequest":

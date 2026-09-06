@@ -33,6 +33,6 @@ class ScienceCentre:
             }
         }
         self.enriched_fuel = 0
-        self.unenriched_fuel = 0
+        self.unenriched_fuel = 100
         self.enrichment_level = 0.0
         self.centrifuge = Centrifuge()

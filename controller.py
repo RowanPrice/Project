@@ -7,7 +7,7 @@ import time
 class Game:
     def __init__(self):
         self.reactor = Reactor()
-        self.power_plant_on = False
+        self.power_plant_on = True
         self.battery = Battery(1000000, charge_rate=100000, discharge_rate=80000)
         self.science_centre = ScienceCentre()
         self.money = 10000
