@@ -1,235 +1,298 @@
 <!doctype html>
 <html lang="en">
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Reactor Control Room</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reactor Control Room</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%230c1013'/%3E%3Ccircle cx='16' cy='16' r='4' fill='%2346d17f'/%3E%3Cg stroke='%2346d17f' stroke-width='1.6' fill='none'%3E%3Cellipse cx='16' cy='16' rx='11' ry='4.5'/%3E%3Cellipse cx='16' cy='16' rx='11' ry='4.5' transform='rotate(60 16 16)'/%3E%3Cellipse cx='16' cy='16' rx='11' ry='4.5' transform='rotate(120 16 16)'/%3E%3C/g%3E%3C/svg%3E">
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <header class="topbar">
-        {% if data.mode == 'map' %}
-        <h1>Map</h1>
-        {% endif %}
-        {% if data.mode == 'map' %}
-        <div class="money" id="map-money">£{{ "{:,}".format(data.money) }}</div>
-        {% endif %}
-    </header>
+<div id="app">
 
-    <main>
-        {% if data.mode != 'map' %}
-        <nav class="mode-tabs building-nav">
-            <form action="{{ url_for('return_to_map') }}" method="post">
-                <button class="mode-button">Back to Map</button>
-            </form>
-            <form action="{{ url_for('set_mode', mode='power_plant') }}" method="post">
-                <button class="mode-button {% if data.mode == 'power_plant' %}active{% endif %}">Power Plant</button>
-            </form>
-            <form action="{{ url_for('set_mode', mode='science_centre') }}" method="post">
-                <button class="mode-button {% if data.mode == 'science_centre' %}active{% endif %}">Science Centre</button>
-            </form>
-            <form action="{{ url_for('set_mode', mode='battery') }}" method="post">
-                <button class="mode-button {% if data.mode == 'battery' %}active{% endif %}">Battery</button>
-            </form>
-            <form action="{{ url_for('set_mode', mode='administration') }}" method="post">
-                <button class="mode-button {% if data.mode == 'administration' %}active{% endif %}">Administrative Building</button>
-            </form>
-        </nav>
-        {% endif %}
+  <header class="topbar">
+    <div class="brand">Unit 1 &middot; <b>PWR</b> &middot; 3400 MW<sub>th</sub></div>
+    <div class="clock" id="clock">--</div>
+    <div class="speeds" id="speeds"></div>
+    <button class="act" id="btn-scenarios">Scenarios</button>
+    <div class="spacer"></div>
+    <div class="headline">
+      <div><span>Reactor</span><b id="hl-power">--</b></div>
+      <div><span>Output</span><b id="hl-mwe">--</b></div>
+      <div><span>Period</span><b id="hl-period">--</b></div>
+      <div><span>Grid</span><b id="hl-freq">--</b></div>
+      <div><span>Cash</span><b id="hl-cash">--</b></div>
+    </div>
+  </header>
 
-        {% if data.mode == 'map' %}
-        <section class="map-screen">
-            <div class="building-grid">
-                <form class="building-card operational" action="{{ url_for('enter_building', building='power_plant') }}" method="post">
-                    <button>
-                        <strong>Power Plant</strong>
-                    </button>
-                </form>
-                <form class="building-card research" action="{{ url_for('enter_building', building='science_centre') }}" method="post">
-                    <button>
-                        <strong>Science Centre</strong>
-                    </button>
-                </form>
-                <form class="building-card energy" action="{{ url_for('enter_building', building='battery') }}" method="post">
-                    <button>
-                        <strong>Battery</strong>
-                    </button>
-                </form>
-                <form class="building-card administration" action="{{ url_for('enter_building', building='administration') }}" method="post">
-                    <button>
-                        <strong>Administrative Building</strong>
-                    </button>
-                </form>
+  <div class="alarms" id="alarms"></div>
+
+  <div class="body">
+    <aside class="rail">
+      <section>
+        <h3>Reactor</h3>
+        <div id="rail-reactor"></div>
+      </section>
+      <section>
+        <h3>Primary circuit</h3>
+        <div id="rail-primary"></div>
+      </section>
+      <section>
+        <h3>Secondary</h3>
+        <div id="rail-secondary"></div>
+      </section>
+      <section>
+        <h3>Commercial</h3>
+        <div id="rail-commercial"></div>
+      </section>
+    </aside>
+
+    <div class="main">
+      <nav class="tabs" id="tabs">
+        <button data-tab="reactor" class="active">Reactor</button>
+        <button data-tab="thermal">Thermal</button>
+        <button data-tab="electrical">Electrical</button>
+        <button data-tab="commercial">Commercial</button>
+        <button data-tab="fuel">Fuel</button>
+        <button data-tab="plant">Plant</button>
+      </nav>
+
+      <div class="panels">
+
+        <!-- ------------------------------------------------ reactor -->
+        <section class="panel active" data-panel="reactor">
+          <div class="grid two">
+            <div class="card">
+              <h3>Control rod banks</h3>
+              <div class="banks" id="banks"></div>
+              <div class="row">
+                <button class="act" data-rods="-5">&#9660;&#9660; 5%</button>
+                <button class="act" data-rods="-1">&#9660; 1%</button>
+                <button class="act" data-rods="-0.2">&#9660; 0.2%</button>
+                <button class="act" data-rods="0.2">&#9650; 0.2%</button>
+                <button class="act" data-rods="1">&#9650; 1%</button>
+                <button class="act" data-rods="5">&#9650;&#9650; 5%</button>
+              </div>
+              <div class="row">
+                <button class="act" id="btn-auto-rods">Automatic rod control</button>
+                <button class="act" id="btn-reset-trip">Reset trip</button>
+              </div>
+              <button class="scram" id="btn-scram">EMERGENCY SCRAM</button>
+              <p class="help" id="rod-help"></p>
             </div>
+
+            <div class="card">
+              <h3>Reactivity balance</h3>
+              <div class="balance" id="balance"></div>
+              <h3 style="margin-top:14px">Reactor power &amp; reactivity</h3>
+              <canvas id="chart-power" height="130"></canvas>
+              <div class="chart-label"><span>power %, log</span><span id="chart-power-range"></span></div>
+            </div>
+
+            <div class="card">
+              <h3>Chemical and volume control</h3>
+              <div class="row">
+                <button class="act" data-boron="1">Borate</button>
+                <button class="act" data-boron="0">Hold</button>
+                <button class="act" data-boron="-1">Dilute</button>
+                <button class="act" id="btn-auto-boron">Auto</button>
+              </div>
+              <div id="boron-readings"></div>
+              <p class="help">
+                Boron is the slow half of reactivity control: rods handle minutes,
+                boron handles hours. Note the moderator coefficient &mdash; heavily
+                borated water gets <em>less</em> negative, and above about 1810 ppm
+                it turns positive, at which point a rise in coolant temperature
+                adds reactivity instead of removing it.
+              </p>
+            </div>
+
+            <div class="card">
+              <h3>Xenon-135</h3>
+              <canvas id="chart-xenon" height="120"></canvas>
+              <div class="chart-label"><span>pcm</span><span id="xenon-note"></span></div>
+              <div id="xenon-readings"></div>
+            </div>
+          </div>
         </section>
-        {% elif data.mode == 'power_plant' %}
-        <section class="workspace power-plant-workspace">
-            <div class="section-heading">
-                <div>
-                    <p class="eyebrow">OPERATIONS</p>
-                    <h2>Power Plant</h2>
-                </div>
-                <span class="money">£{{ "{:,}".format(data.money) }}</span>
-            </div>
-            <div class="metric-grid {% if not data.power_plant_on %}plant-off-state{% endif %}">
-                <article class="metric-card">
-                    <span>Core temperature</span>
-                    <strong id="temperature">{{ data.reactor.temperature }}°C</strong>
-                </article>
-                <article class="metric-card">
-                    <span>Average rod depth</span>
-                    <strong id="rod-depth">{{ data.reactor.average_rod_depth }}</strong>
-                </article>
-                <article class="metric-card">
-                    <span>Battery</span>
-                    <strong>{{ data.battery.charge|round(0, 'ceil')|int }}/{{ data.battery.capacity }}</strong>
-                </article>
-            </div>
-            <div class="control-panel">
-                <div class="panel-heading">
-                    <h3>Control rods</h3>
-                </div>
-                <div class="rod-control-area">
-                    <div class="rod-list">
-                    {% for rod in data.reactor.rods %}
-                    <div class="rod-column">
-                        <button type="button" class="rod-select-button" data-rod="{{ loop.index0 }}" {% if not data.power_plant_on %}disabled{% endif %}>Rod {{ loop.index }}</button>
-                        <span class="rod-value" id="rod-value-{{ loop.index0 }}">{{ rod }}/100</span>
-                    </div>
-                    {% endfor %}
-                    </div>
-                    <form id="rod-controls" class="rod-controls" method="post">
-                        <button type="button" class="hold-control raise-control" data-action="raise" aria-label="Hold to raise selected rods" {% if not data.power_plant_on %}disabled{% endif %}><span class="triangle triangle-up"></span></button>
-                        <button type="button" class="hold-control lower-control" data-action="lower" aria-label="Hold to lower selected rods" {% if not data.power_plant_on %}disabled{% endif %}><span class="triangle triangle-down"></span></button>
-                    </form>
-                </div>
-                <div class="bottom-controls">
-                    <form class="no-refresh-form scram-form" action="{{ url_for('reactor_action', action='scram') }}" method="post"><button class="danger-button">Emergency SCRAM</button></form>
-                </div>
-            </div>
-        </section>
-        {% elif data.mode == 'science_centre' %}
-        <section class="workspace">
-            <div class="section-heading">
-                <div>
-                    <p class="eyebrow">RESEARCH AND DEVELOPMENT</p>
-                    <h2>Science Centre</h2>
-                </div>
-                <span class="money">£{{ "{:,}".format(data.money) }}</span>
-            </div>
-            <div class="science-tabs">
-                <button class="science-tab active" data-tab="enrichment-panel">Enrichment</button>
-                <button class="science-tab" data-tab="upgrades-panel">Purchase Upgrades</button>
-            </div>
 
-            <section id="enrichment-panel" class="science-panel">
-                <div class="enrichment-layout">
-                    <div class="enrichment-controls">
-                        <div class="fuel-balances">
-                            <div><span>Enriched fuel</span><strong id="enriched-fuel">{{ data.science.enriched_fuel }}</strong></div>
-                            <div class="fuel-buy-line"><span>Unenriched fuel</span><strong id="unenriched-fuel">{{ data.science.unenriched_fuel }}</strong><form class="no-refresh-form" action="{{ url_for('buy_fuel') }}" method="post"><input type="hidden" name="amount" value="100"><button class="plus-button">Buy 100</button></form></div>
-                        </div>
-                        <div class="metrics-list">
-                            <p>Centrifuge quality <b>Level {{ data.science.quality_level }} · {{ data.science.enrichment_multiplier }}x</b></p>
-                            <p>Centrifuge speed <b>Level {{ data.science.speed_level }} · {{ data.science.speed_multiplier }}x</b></p>
-                        </div>
-                        <form class="enrichment-form no-refresh-form" action="{{ url_for('start_enrichment') }}" method="post">
-                            <label for="fuel-amount">Fuel to enrich</label>
-                            <div class="amount-row"><input id="fuel-amount" name="amount" type="number" min="0" max="{{ data.science.unenriched_fuel }}" value="{{ [100, data.science.unenriched_fuel]|min }}" required><span>units</span></div>
-                            <button class="primary-button" {% if data.science.unenriched_fuel == 0 or data.science.enrichment.in_progress %}disabled{% endif %}>Start Enrichment</button>
-                        </form>
-                        <div class="progress-area">
-                            <div class="progress-label"><span>Progress</span><b id="progress-value">{{ "%.1f"|format(data.science.enrichment.progress * 100) }}%</b></div>
-                            <p id="time-left">{% if data.science.enrichment.in_progress %}{{ "%.0f"|format(data.science.enrichment.time_left) }} seconds remaining{% else %}Ready for a new batch{% endif %}</p>
-                        </div>
-                    </div>
-                    <div class="sprite-placeholder"><span>CENTRIFUGE SPRITE<br>PLACEHOLDER</span></div>
-                </div>
-                <button type="button" class="dev-button" id="skip-enrichment">DEV: Skip wait</button>
-            </section>
-
-            <section id="upgrades-panel" class="science-panel hidden">
-                <div class="upgrade-table">
-                    <div class="upgrade-header"><span>Category</span><span>Upgrade</span><span>Effect</span><span>Cost</span><span></span></div>
-                    {% for category, upgrades in data.science.upgrades.items() %}
-                        {% for name, upgrade in upgrades.items() %}
-                        <div class="upgrade-row" data-upgrade-category="{{ category }}" data-upgrade-name="{{ name }}"><span>{{ category }}</span><strong>{{ name }}</strong><span>{{ upgrade.effect }}</span><span>£{{ "{:,}".format(upgrade.cost) }}</span><form class="upgrade-form" action="{{ url_for('purchase_upgrade') }}" method="post"><input type="hidden" name="category" value="{{ category }}"><input type="hidden" name="name" value="{{ name }}"><button class="small-button" {% if upgrade.purchased or data.money < upgrade.cost %}disabled{% endif %}>{% if upgrade.purchased %}Purchased{% elif data.money < upgrade.cost %}Not enough money{% else %}Purchase{% endif %}</button></form></div>
-                        {% endfor %}
-                    {% endfor %}
-                </div>
-            </section>
+        <!-- ------------------------------------------------ thermal -->
+        <section class="panel" data-panel="thermal">
+          <div class="grid two">
+            <div class="card span">
+              <h3>Heat balance</h3>
+              <canvas id="schematic" height="230"></canvas>
+            </div>
+            <div class="card">
+              <h3>Reactor coolant pumps</h3>
+              <div class="row" id="pumps"></div>
+              <div id="primary-readings"></div>
+              <p class="help">
+                Four pumps push 18 700 kg/s through the core and put about 18 MW of
+                shaft heat into the water &mdash; which is how a cold plant is warmed
+                up before the reactor is ever taken critical. Lose flow at power and
+                the protection system trips at 87% of rated.
+              </p>
+            </div>
+            <div class="card">
+              <h3>Turbine and steam dumps</h3>
+              <label class="field">Turbine governor demand <span id="turbine-label" class="mono"></span></label>
+              <input type="range" id="turbine-demand" min="0" max="100" value="100">
+              <label class="field">Steam dump setpoint <span id="dump-label" class="mono"></span></label>
+              <input type="range" id="dump-setpoint" min="20" max="900" value="750">
+              <div class="row">
+                <button class="act" id="btn-reset-turbine">Reset turbine</button>
+                <button class="act" id="btn-auto-feed">Auto feedwater</button>
+                <button class="act danger" id="btn-si">Safety injection</button>
+              </div>
+              <div id="secondary-readings"></div>
+              <p class="help">
+                Open the turbine and the secondary side cools, so the steam
+                generators pull more heat out of the primary, so coolant
+                temperature falls, so a negative moderator coefficient adds
+                reactivity and power rises to meet the load on its own. The reactor
+                follows the turbine. The dumps only pass 45% of rated flow, so a
+                load rejection larger than that has to be matched by the rods.
+              </p>
+            </div>
+            <div class="card">
+              <h3>Temperatures</h3>
+              <canvas id="chart-temp" height="130"></canvas>
+              <div class="chart-label"><span>&deg;C</span><span id="chart-temp-range"></span></div>
+              <h3 style="margin-top:12px">Primary pressure</h3>
+              <canvas id="chart-pressure" height="110"></canvas>
+              <div class="chart-label"><span>MPa</span><span id="chart-pressure-range"></span></div>
+            </div>
+          </div>
         </section>
-        {% elif data.mode == 'battery' %}
-        <section id="battery-screen" class="battery-screen" data-no-zap="{{ url_for('battery_image', filename='Battery_no_zap.svg') }}" data-zap="{{ url_for('battery_image', filename='Battery_zap.svg') }}" style="--battery-image: url('{{ url_for('battery_image', filename='Battery_no_zap.svg') }}');">
-            <div class="battery-screen-header">
-                <div>
-                    <p class="eyebrow">ENERGY STORAGE</p>
-                    <h2>Battery</h2>
-                </div>
-                <span class="money">£{{ "{:,}".format(data.money) }}</span>
-            </div>
-            <div class="battery-panel">
-                <p class="eyebrow">BATTERY OUTPUT</p>
-                <div class="battery-charge" id="battery-charge">{{ data.battery.charge|round(0, 'ceil')|int }} W</div>
-                <div class="battery-capacity">of {{ "{:,.0f}".format(data.battery.capacity) }} W capacity</div>
-                <div class="battery-meter"><i id="battery-meter-fill" style="width: {{ (data.battery.charge / data.battery.capacity * 100) if data.battery.capacity else 0 }}%"></i></div>
-                <div class="battery-rates">
-                    <div><span>Max charging rate</span><strong>{{ "{:,.0f}".format(data.battery.max_charge_rate) }} W</strong></div>
-                    <div><span>Max discharging rate</span><strong>{{ "{:,.0f}".format(data.battery.max_discharge_rate) }} W</strong></div>
-                </div>
-                <div class="battery-actions">
-                    <form class="no-refresh-form" action="{{ url_for('battery_action', action='charging') }}" method="post"><button class="battery-button charge-button">Charge</button></form>
-                    <form class="no-refresh-form" action="{{ url_for('battery_action', action='discharging') }}" method="post"><button class="battery-button discharge-button">Discharge</button></form>
-                    <form class="no-refresh-form" action="{{ url_for('battery_action', action='stop') }}" method="post"><button class="battery-button stop-button">Stop</button></form>
-                </div>
-                <p class="battery-mode" id="battery-mode">{% if data.battery.mode %}{{ data.battery.mode|capitalize }}{% else %}Idle{% endif %}</p>
-            </div>
-        </section>
-        {% else %}
-        <section class="workspace administration-workspace">
-            <div class="section-heading">
-                <div>
-                    <p class="eyebrow">FACILITY MANAGEMENT</p>
-                    <h2>Administrative Building</h2>
-                </div>
-                <span class="money">£{{ "{:,}".format(data.money) }}</span>
-            </div>
-            <div class="science-tabs administration-tabs">
-                <button class="science-tab active" data-tab="contracts-panel">Contracts</button>
-                <button class="science-tab" data-tab="hiring-panel">Hiring</button>
-            </div>
-            <section id="contracts-panel" class="science-panel">
-                <div class="contract-list">
-                    {% for contract in data.administration.contracts %}
-                    <article class="contract-row">
-                        <div><p class="eyebrow">CONTRACT {{ "%02d"|format(loop.index) }}</p><h3>{{ contract.title }}</h3><p>{{ contract.description }}</p></div>
-                        <strong>£{{ "%.2f"|format(contract.pay_per_watt) }} / W<br><small>{{ "{:,.0f}".format(contract.total_power_required) }} MW · {{ contract.time_to_complete }} min</small></strong>
-                        <button type="button" class="primary-button contract-info-button" data-contract="{{ loop.index0 }}" data-active="{{ data.administration.active_contract == loop.index0 }}" data-title="{{ contract.title }}" data-pay="£{{ "%.2f"|format(contract.pay_per_watt) }} per watt" data-power="{{ "{:,.0f}".format(contract.total_power_required) }} MW total power required" data-time="{{ contract.time_to_complete }} minutes to complete" data-description="{{ contract.description }}">Info</button>
-                    </article>
-                    {% endfor %}
-                </div>
-            </section>
-            <section id="hiring-panel" class="science-panel hidden"></section>
-        </section>
-        {% endif %}
-    </main>
 
-    <dialog id="contract-info-dialog">
-        <div class="shop-dialog contract-dialog">
-            <button type="button" class="close-button" id="close-contract-info">×</button>
-            <p class="eyebrow">CONTRACT DETAILS</p>
-            <h2 id="contract-info-title"></h2>
-            <p class="contract-info-pay" id="contract-info-pay"></p>
-            <p class="contract-info-power" id="contract-info-power"></p>
-            <p class="contract-info-time" id="contract-info-time"></p>
-            <p class="contract-info-description" id="contract-info-description"></p>
-            <form id="contract-start-form" class="contract-start-form" action="{{ url_for('start_contract') }}" method="post">
-                <input id="contract-info-index" type="hidden" name="contract" value="">
-                <button id="contract-start-button" class="primary-button">Start Contract</button>
-            </form>
-        </div>
-    </dialog>
+        <!-- --------------------------------------------- electrical -->
+        <section class="panel" data-panel="electrical">
+          <div class="grid two">
+            <div class="card">
+              <h3>Generator</h3>
+              <div id="generator-readings"></div>
+            </div>
+            <div class="card">
+              <h3>Grid</h3>
+              <div id="grid-readings"></div>
+              <canvas id="chart-frequency" height="100" style="margin-top:8px"></canvas>
+              <div class="chart-label"><span>Hz</span><span>50.00 nominal, statutory band &plusmn;0.5</span></div>
+            </div>
+            <div class="card">
+              <h3>Battery storage</h3>
+              <div class="meter" id="soc-meter"><i></i></div>
+              <label class="field">Power demand <span id="battery-label" class="mono"></span></label>
+              <input type="range" id="battery-power" min="-200" max="200" value="0">
+              <div class="row">
+                <button class="act" id="btn-battery-zero">Standby</button>
+                <button class="act" id="btn-freq-response">Frequency response</button>
+                <button class="act" id="btn-replace-battery">Replace cells</button>
+              </div>
+              <div id="battery-readings"></div>
+              <p class="help">
+                Charging costs the spot price and discharging earns it, so the pack
+                pays for itself overnight and at the evening peak. Every cycle takes
+                a little capacity away permanently, faster at high C-rate and near
+                either end of the state of charge.
+              </p>
+            </div>
+            <div class="card">
+              <h3>Spot price and demand</h3>
+              <canvas id="chart-price" height="120"></canvas>
+              <div class="chart-label"><span>&pound;/MWh</span><span id="chart-price-range"></span></div>
+            </div>
+          </div>
+        </section>
 
-    <script src="{{ url_for('static', filename='app.js') }}"></script>
+        <!-- --------------------------------------------- commercial -->
+        <section class="panel" data-panel="commercial">
+          <div class="grid two">
+            <div class="card span">
+              <h3>Active contracts</h3>
+              <div id="active-contracts"></div>
+            </div>
+            <div class="card span">
+              <h3>Offers</h3>
+              <div id="contract-offers"></div>
+            </div>
+            <div class="card">
+              <h3>Finance</h3>
+              <div id="finance-readings"></div>
+            </div>
+            <div class="card">
+              <h3>Recent transactions</h3>
+              <div id="ledger"></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- --------------------------------------------------- fuel -->
+        <section class="panel" data-panel="fuel">
+          <div class="grid two">
+            <div class="card">
+              <h3>Enrichment order</h3>
+              <label class="field">Product quantity, kg</label>
+              <input type="number" id="fuel-kg" value="26000" min="1000" step="1000">
+              <label class="field">Product assay, % U-235</label>
+              <input type="number" id="fuel-assay" value="4.50" min="1" max="5" step="0.05">
+              <label class="field">Tails assay, % U-235</label>
+              <input type="number" id="fuel-tails" value="0.25" min="0.10" max="0.40" step="0.01">
+              <div class="row" style="margin-top:10px">
+                <button class="act wide" id="btn-quote">Get quote</button>
+                <button class="act wide on" id="btn-order">Place order</button>
+              </div>
+              <div id="quote"></div>
+              <p class="help">
+                Separative work is real work: SWU/kg = V(x<sub>p</sub>) +
+                (F/P&minus;1)&middot;V(x<sub>w</sub>) &minus; (F/P)&middot;V(x<sub>f</sub>),
+                where V(x) = (2x&minus;1)&middot;ln(x/(1&minus;x)). Drive the tails
+                assay down and each kilogram of product needs less natural uranium
+                but a great deal more separative work. Which way is cheaper depends
+                on the two prices, and they move independently.
+              </p>
+            </div>
+            <div class="card">
+              <h3>Core and fuel store</h3>
+              <div id="fuel-readings"></div>
+              <div class="row" style="margin-top:10px">
+                <button class="act wide" id="btn-refuel">Start refuelling outage</button>
+              </div>
+              <p class="help">
+                A reload needs 26 000 kg in store and the plant in cold shutdown
+                below 95 &deg;C. Cool down at more than 55 K/h and the pressure
+                vessel accumulates thermal fatigue that no outage will undo.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <!-- -------------------------------------------------- plant -->
+        <section class="panel" data-panel="plant">
+          <div class="grid two">
+            <div class="card span">
+              <h3>Plant condition</h3>
+              <div id="components"></div>
+            </div>
+            <div class="card span">
+              <h3>Capital programme</h3>
+              <div id="upgrades"></div>
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </div>
+  </div>
+
+  <div class="logbar" id="logbar"></div>
+</div>
+
+<div class="overlay" id="overlay">
+  <div class="modal" id="modal"></div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script src="{{ url_for('static', filename='app.js') }}"></script>
 </body>
 </html>
