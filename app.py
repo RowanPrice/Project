@@ -48,7 +48,7 @@ def state():
         },
         "administration": {
             "active_contract": game.active_contract,
-            "contracts": game.contracts
+            "contracts": game.admin.contracts
         }
     }
 
@@ -93,7 +93,7 @@ def add_dev_money():
 @app.post("/administration/start-contract")
 def start_contract():
     contract_index = int(request.form.get("contract", -1))
-    if 0 <= contract_index < len(game.contracts):
+    if 0 <= contract_index < len(game.admin.contracts):
         game.active_contract = contract_index
     if request.headers.get("X-Requested-With") == "XMLHttpRequest":
         update_game()

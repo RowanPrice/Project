@@ -1,6 +1,7 @@
 from nuclear import Reactor
 from battery import Battery
 from science import ScienceCentre
+from administrative import Admin
 import random
 import time
 
@@ -10,7 +11,7 @@ class Game:
         self.power_plant_on = True
         self.battery = Battery(1000000, charge_rate=100000, discharge_rate=80000)
         self.science_centre = ScienceCentre()
-        self.money = 10000
+        self.money = 100000
         self.enrichment_in_progress = False
         self.enrichment_elapsed = 0
         self.enrichment_duration = 120
