@@ -122,7 +122,7 @@ def get_state():
 @app.post("/mode/<mode>")
 def set_mode(mode):
     global game_mode
-    if mode in ("power_plant", "science_centre", "battery"):
+    if mode in ("power_plant", "science_centre", "battery","administration"):
         game_mode = mode
     return redirect(url_for("index"))
 
