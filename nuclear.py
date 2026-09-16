@@ -5,7 +5,7 @@ class Reactor:
         self.max_rod_depth = max_rod_depth
         self.num_rods = num_rods
         self.base_temperature = initial_temperature
-        self.auto_scram_temperature = auto_scram_temperature # this is much higher than the actual temperature for an autoscram, which is only a few degrees off of normal operating temperature
+        self.auto_scram_temperature = auto_scram_temperature
         self.auto_scram = auto_scram
         self.cold_shutdown_temperature = cold_shutdown_temperature
         self.meltdown_temperature = meltdown_temperature

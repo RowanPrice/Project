@@ -136,25 +136,6 @@ class Game:
             "duration": self.enrichment_duration
         }
 
-    def add_upgrade_category(self, category_name):
-        if category_name not in self.science_centre.upgrades:
-            self.science_centre.upgrades[category_name] = {}
-            return True
-        return False
-
-    def add_upgrade(self, category_name, upgrade_name, cost, effect):
-        if category_name not in self.science_centre.upgrades:
-            print(f"Category '{category_name}' does not exist")
-            return False
-        if upgrade_name in self.science_centre.upgrades[category_name] or cost < 0:
-            return False
-        self.science_centre.upgrades[category_name][upgrade_name] = {
-            "cost": cost,
-            "effect": effect,
-            "purchased": False
-        }
-        return True
-
     def purchase_upgrade(self, category_name, upgrade_name):
         upgrades = self.science_centre.upgrades
         if category_name not in upgrades or upgrade_name not in upgrades[category_name]:
@@ -163,18 +144,14 @@ class Game:
         if upgrade["purchased"]:
             return False
         if self.money < upgrade["cost"]:
-            print("Not enough money to purchase this upgrade")
             return False
         self.money -= upgrade["cost"]
         upgrade["purchased"] = True
-        print(f"Purchased '{upgrade_name}' for £{upgrade['cost']}")
-        print(f"Effect: {upgrade['effect']}")
         return True
 
     def upgrade_centrifuge_quality(self):
         centrifuge = self.science_centre.centrifuge
         if centrifuge.quality_level >= centrifuge.max_level:
-            print(f"Centrifuge quality is already at maximum level {centrifuge.max_level}")
             return 0
         centrifuge.quality_level += 1
         return centrifuge.quality_cost
@@ -182,7 +159,6 @@ class Game:
     def upgrade_centrifuge_speed(self):
         centrifuge = self.science_centre.centrifuge
         if centrifuge.speed_level >= centrifuge.max_level:
-            print(f"Centrifuge speed is already at maximum level {centrifuge.max_level}")
             return 0
         centrifuge.speed_level += 1
         return centrifuge.speed_cost
