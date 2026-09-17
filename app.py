@@ -7,7 +7,7 @@ from controller import Game
 app = Flask(__name__)
 game = Game()
 last_update = time.monotonic()
-
+game_mode = "map"
 
 def update_game():
     global last_update
@@ -18,7 +18,6 @@ def update_game():
     game.update_battery(elapsed)
     if game.power_plant_on:
         game.update_temperature()
-
 
 def state():
     centre = game.get_centre_status()
@@ -52,22 +51,16 @@ def state():
         }
     }
 
-
-game_mode = "map"
-
-
 @app.route("/")
 def index():
     update_game()
     return render_template("index.html", data=state())
-
 
 @app.route("/battery-image/<filename>")
 def battery_image(filename):
     if filename not in ("Battery_no_zap.svg", "Battery_zap.svg"):
         return "Not found", 404
     return send_from_directory(app.root_path, filename)
-
 
 @app.post("/building/<building>")
 def enter_building(building):
@@ -76,19 +69,16 @@ def enter_building(building):
         game_mode = building
     return redirect(url_for("index"))
 
-
 @app.post("/map")
 def return_to_map():
     global game_mode
     game_mode = "map"
     return redirect(url_for("index"))
 
-
 @app.post("/dev/add-money")
 def add_dev_money():
     game.money += 1000
     return jsonify(state())
-
 
 @app.post("/administration/start-contract")
 def start_contract():
@@ -99,7 +89,6 @@ def start_contract():
         update_game()
         return jsonify(state())
     return redirect(url_for("index"))
-
 
 @app.post("/battery/<action>")
 def battery_action(action):
@@ -112,12 +101,10 @@ def battery_action(action):
         return jsonify(state())
     return redirect(url_for("index"))
 
-
 @app.route("/state")
 def get_state():
     update_game()
     return jsonify(state())
-
 
 @app.post("/mode/<mode>")
 def set_mode(mode):
@@ -126,21 +113,18 @@ def set_mode(mode):
         game_mode = mode
     return redirect(url_for("index"))
 
-
 @app.post("/reactor/<action>")
 def reactor_action(action):
     if not game.power_plant_on and action != "toggle":
         if request.headers.get("X-Requested-With") == "XMLHttpRequest":
             return jsonify(state())
         return redirect(url_for("index"))
-
     if action == "toggle":
         game.power_plant_on = not game.power_plant_on
         if request.headers.get("X-Requested-With") == "XMLHttpRequest":
             update_game()
             return jsonify(state())
         return redirect(url_for("index"))
-
     rod_values = request.form.getlist("rods")
     if not rod_values:
         rod_values = [request.form.get("rod", game.reactor.current_rod)]
@@ -161,7 +145,6 @@ def reactor_action(action):
         return jsonify(state())
     return redirect(url_for("index"))
 
-
 @app.post("/science/buy-fuel")
 def buy_fuel():
     amount = int(request.form.get("amount", 0))
@@ -172,7 +155,6 @@ def buy_fuel():
         response["action_succeeded"] = purchased
         return jsonify(response)
     return redirect(url_for("index"))
-
 
 @app.post("/science/start-enrichment")
 def start_enrichment():
@@ -186,7 +168,6 @@ def start_enrichment():
         return jsonify(response)
     return redirect(url_for("index"))
 
-
 @app.post("/science/skip-enrichment")
 def skip_enrichment():
     skipped = game.skip_enrichment()
@@ -196,7 +177,6 @@ def skip_enrichment():
         response["action_succeeded"] = skipped
         return jsonify(response)
     return redirect(url_for("index"))
-
 
 @app.post("/science/purchase-upgrade")
 def purchase_upgrade():
@@ -210,7 +190,6 @@ def purchase_upgrade():
         response["purchase_succeeded"] = purchased
         return jsonify(response)
     return redirect(url_for("index"))
-
 
 if __name__ == "__main__":
     app.run(debug=True)
