@@ -115,16 +115,6 @@ def set_mode(mode):
 
 @app.post("/reactor/<action>")
 def reactor_action(action):
-    if not game.power_plant_on and action != "toggle":
-        if request.headers.get("X-Requested-With") == "XMLHttpRequest":
-            return jsonify(state())
-        return redirect(url_for("index"))
-    if action == "toggle":
-        game.power_plant_on = not game.power_plant_on
-        if request.headers.get("X-Requested-With") == "XMLHttpRequest":
-            update_game()
-            return jsonify(state())
-        return redirect(url_for("index"))
     rod_values = request.form.getlist("rods")
     if not rod_values:
         rod_values = [request.form.get("rod", game.reactor.current_rod)]
