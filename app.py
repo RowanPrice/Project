@@ -4,6 +4,8 @@ from flask import Flask, jsonify, redirect, render_template, request, send_from_
 
 from controller import Game
 
+import os
+
 app = Flask(__name__)
 game = Game()
 last_update = time.monotonic()
@@ -60,7 +62,7 @@ def index():
 def battery_image(filename):
     if filename not in ("Battery_no_zap.svg", "Battery_zap.svg"):
         return "Not found", 404
-    return send_from_directory(app.root_path, filename)
+    return send_from_directory(os.path.join("sprites","interior_sprites"), filename)
 
 @app.post("/building/<building>")
 def enter_building(building):
