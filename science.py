@@ -1,11 +1,13 @@
 class Centrifuge:
     def __init__(self):
-        self.quality_level = 1
-        self.speed_level = 1
-        self.quality_cost = 500
-        self.speed_cost = 300
-        self.max_level = 10
-        self.max_multiplier = 1.5
+        self.time_per_fuel = 1.2
+        self.speed_multiplier = 0
+        #self.quality_level = 1
+        #self.speed_level = 1
+        #self.quality_cost = 500
+        #self.speed_cost = 300
+        #self.max_level = 10
+        #self.max_multiplier = 1.5
 
 
 class ScienceCentre:

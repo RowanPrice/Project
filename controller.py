@@ -1,6 +1,7 @@
 from nuclear import Reactor
 from battery import Battery
 from science import ScienceCentre
+from science import Centrifuge
 from administrative import Admin
 import random
 import time
@@ -8,27 +9,47 @@ import time
 class Game:
     def __init__(self):
         self.reactor = Reactor()
-        self.power_plant_on = True
+        self.power_plant_on:bool = True
         self.battery = Battery(1000000, charge_rate=100000, discharge_rate=80000)
         self.science_centre = ScienceCentre()
         self.admin = Admin()
-        self.money = 100000
-        self.enrichment_in_progress = False
-        self.enrichment_elapsed = 0
-        self.enrichment_duration = 120
-        self.enrichment_fuel_amount = 0
-        self.enrichment_percentage = 0
-        self.fuel_price = 10
+        self.money:int = 100000
+        self.enrichment_in_progress:bool = False
+        self.enrichment_elapsed:int = 0
+        self.enrichment_duration:int = 120
+        self.fuel_price:int = 10
         self.active_contract = None
 
     # Battery controls
-    def select_battery_mode(self, mode):
+    def select_battery_mode(self, mode:str):
+        """
+        Changes the battery mode
+
+        Parameters
+        ----------
+        mode: mode for the battery to be changed to - either charging or discharging
+
+        Returns
+        -------
+
+        """
         mode = mode.lower()
         if mode not in ("charging", "discharging"):
             raise ValueError("Mode must be 'charging' or 'discharging'")
         self.battery.mode = mode
 
-    def set_battery_rate(self, percentage):
+    def set_battery_rate(self, percentage:int):
+        """
+        The rate for the battery to charge/discharge at
+
+        Parameters
+        ----------
+        percentage: percentage to charge at
+
+        Returns
+        -------
+
+        """
         if not 0 <= percentage <= 100:
             raise ValueError("Rate percentage must be between 0 and 100")
         self.battery.rate_percentage = percentage
@@ -59,14 +80,36 @@ class Game:
                 self.battery.mode = None
         return changed
 
-    def add_battery_charge(self, amount):
+    def add_battery_charge(self, amount:int) -> int:
+        """
+        Adds charge to the battery, cannot go over capacity
+
+        Parameters
+        ----------
+        amount: amount of charge to be added to the battery
+
+        Returns
+        -------
+        allowed: amount of charge that has been added to the battery
+        """
         if amount < 0:
             raise ValueError("Amount cannot be negative")
         allowed = min(amount, self.battery.capacity - self.battery.current_charge)
         self.battery.current_charge += allowed
         return allowed
 
-    def use_battery_charge(self, amount):
+    def use_battery_charge(self, amount:int) -> int:
+        """
+        Removes charge from the battery, cannot go into negative
+
+        Parameters
+        ----------
+        amount: amount of charge to be removed from the battery
+
+        Returns
+        -------
+        allowed: amount of charge removed from the battery
+        """
         if amount < 0:
             raise ValueError("Amount cannot be negative")
         allowed = min(amount, self.battery.current_charge)
@@ -74,35 +117,55 @@ class Game:
         return allowed
 
     def recharge_battery(self):
+        """
+        Fully recharges battery
+        """
         self.battery.current_charge = self.battery.capacity
 
-    # Science Centre controls
-    def buy_unenriched_fuel(self, amount):
+    def buy_unenriched_fuel(self, amount:int) -> bool:
+        """
+        Exchanges money for unenriched fuel
+
+        Parameters
+        ----------
+        amount: amount of fuel to be purchased
+
+        Returns
+        -------
+        True
+        """
         if amount <= 0 or self.money < amount * self.fuel_price:
             return False
         self.money -= amount * self.fuel_price
         self.science_centre.unenriched_fuel += amount
         return True
 
-    def start_enrichment(self, fuel_amount=100, enrichment_percentage=4.5):
+    def start_enrichment(self, fuel_amount:int=100) -> bool:
+        """
+        starts conversion of unusable unenriched fuel into usable enriched fuel
+
+        Parameters
+        ----------
+        fuel_amount: amount of fuel to be enriched
+
+        Returns
+        -------
+        True: if the enrichment can be started
+        False: if the enrichment cannot be started
+        """
         if self.enrichment_in_progress:
             return False
         if fuel_amount <= 0 or fuel_amount > self.science_centre.unenriched_fuel:
             return False
-        if not 0 <= enrichment_percentage <= 20:
-            return False
 
         centrifuge = self.science_centre.centrifuge
-        speed_multiplier = min(1.0 + (centrifuge.speed_level - 1) * 0.1, centrifuge.max_multiplier)
-        self.enrichment_duration = (30 + fuel_amount * 0.9) / speed_multiplier
+        self.enrichment_duration = (centrifuge.time_per_fuel * fuel_amount) / 1 + fuel_amount*0.005 + centrifuge.speed_multiplier
         self.enrichment_elapsed = 0
-        self.enrichment_fuel_amount = fuel_amount
-        self.enrichment_percentage = enrichment_percentage
         self.science_centre.unenriched_fuel -= fuel_amount
         self.enrichment_in_progress = True
         return True
 
-    def update_enrichment(self, elapsed_seconds):
+    def update_enrichment(self, elapsed_seconds:int):
         if elapsed_seconds < 0:
             raise ValueError("Elapsed time cannot be negative")
         if not self.enrichment_in_progress:
@@ -110,7 +173,6 @@ class Game:
 
         self.enrichment_elapsed = min(self.enrichment_elapsed + elapsed_seconds, self.enrichment_duration)
         if self.enrichment_elapsed >= self.enrichment_duration:
-            self.nuclear_fuel_enrichment(self.enrichment_fuel_amount, self.enrichment_percentage)
             self.enrichment_in_progress = False
             return True
         return False
@@ -162,17 +224,6 @@ class Game:
             return 0
         centrifuge.speed_level += 1
         return centrifuge.speed_cost
-
-    def nuclear_fuel_enrichment(self, fuel_amount, enrichment_percentage):
-        if fuel_amount < 0 or not 0 <= enrichment_percentage <= 20:
-            return False
-        centrifuge = self.science_centre.centrifuge
-        multiplier = min(1.0 + (centrifuge.quality_level - 1) * 0.1, centrifuge.max_multiplier)
-        adjusted_enrichment = min(enrichment_percentage * multiplier, 20)
-        self.science_centre.enriched_fuel += fuel_amount
-        self.science_centre.enrichment_level = adjusted_enrichment
-        print(f"Enriched {fuel_amount} units to {adjusted_enrichment:.2f}%")
-        return True
 
     def get_centre_status(self):
         centre = self.science_centre
