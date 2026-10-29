@@ -97,12 +97,13 @@
                     {% endfor %}
                     </div>
                     <form id="rod-controls" class="rod-controls" method="post">
-                        <button type="button" class="hold-control raise-control" data-action="raise" aria-label="Hold to raise selected rods" {% if not data.power_plant_on %}disabled{% endif %}><span class="triangle triangle-up"></span></button>
-                        <button type="button" class="hold-control lower-control" data-action="lower" aria-label="Hold to lower selected rods" {% if not data.power_plant_on %}disabled{% endif %}><span class="triangle triangle-down"></span></button>
+                        <button type="button" class="hold-control raise-control" data-action="raise" aria-label="Press to raise selected rods" {% if not data.power_plant_on %}disabled{% endif %}><span class="triangle triangle-up"></span></button>
+                        <button type="button" class="hold-control lower-control" data-action="lower" aria-label="Press to lower selected rods" {% if not data.power_plant_on %}disabled{% endif %}><span class="triangle triangle-down"></span></button>
                     </form>
                 </div>
                 <div class="bottom-controls">
                     <form class="no-refresh-form scram-form" action="{{ url_for('reactor_action', action='scram') }}" method="post"><button class="danger-button">Emergency SCRAM</button></form>
+                    <form class="no-refresh-form toggle-power-form" action="{{ url_for('reactor_action', action='toggle_power_plant') }}" method="post"><button class="green-button">Switch</button></form>
                 </div>
             </div>
         </section>

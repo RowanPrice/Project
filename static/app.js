@@ -166,6 +166,9 @@ async function refreshState() {
     if (enrichedFuel) enrichedFuel.textContent = data.science.enriched_fuel;
     if (unenrichedFuel) unenrichedFuel.textContent = data.science.unenriched_fuel;
     updateReactorDisplay(data);
+    document.querySelectorAll('.rod-select-button, .hold-control').forEach((button) => {
+        button.disabled = !data.power_plant_on;
+    })
     const batteryCharge = document.getElementById('battery-charge');
     const batteryFill = document.getElementById('battery-meter-fill');
     const batteryMode = document.getElementById('battery-mode');

@@ -110,5 +110,8 @@ dialog::backdrop { background: rgba(23, 50, 77, .35); }
 .power-plant-workspace .triangle { border-left-width: 12px; border-right-width: 12px; }
 .power-plant-workspace .triangle-up { border-bottom-width: 17px; }
 .power-plant-workspace .triangle-down { border-top-width: 17px; }
-.power-plant-workspace .reactor-toggle, .power-plant-workspace .danger-button { min-height: 44px; padding: 10px 16px; border-radius: 0; font-family: Arial, sans-serif; }
+.power-plant-workspace .reactor-toggle { min-height: 44px; padding: 10px 16px; border-radius: 0; font-family: Arial, sans-serif; }
+.power-plant-workspace .danger-button { min-height: 44px; padding: 10px 16px; border-radius: 0; font-family: Arial, sans-serif; }
 .power-plant-workspace .danger-button { min-width: 210px; }
+.power-plant-workspace .toggle-power-form { display: flex; margin: 0; }
+.power-plant-workspace .green-button { color: white; background: #287a46; min-height: 44px; padding: 10px 16px; border-radius: 0; font-family: Arial, sans-serif; }

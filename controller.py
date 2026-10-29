@@ -228,21 +228,22 @@ class Game:
     def get_centre_status(self):
         centre = self.science_centre
         centrifuge = centre.centrifuge
-        enrichment_multiplier = min(1.0 + (centrifuge.quality_level - 1) * 0.1, centrifuge.max_multiplier)
-        speed_multiplier = min(1.0 + (centrifuge.speed_level - 1) * 0.1, centrifuge.max_multiplier)
         return {
             "enriched_fuel": centre.enriched_fuel,
             "unenriched_fuel": centre.unenriched_fuel,
-            "enrichment_level": centre.enrichment_level,
-            "quality_level": centrifuge.quality_level,
-            "speed_level": centrifuge.speed_level,
-            "enrichment_multiplier": round(enrichment_multiplier, 2),
-            "speed_multiplier": round(speed_multiplier, 2),
+            "speed_multiplier": centrifuge.speed_multiplier,
             "upgrades": centre.upgrades
         }
 
+    def create_energy(self):
+        """Calculate energy produced based on core temperature"""
+        if not self.power_plant_on:
+            return 0
+        energy_produced = self.reactor.temperature * sum(self.reactor.rods) * 0.1
+        energy_produced += random.uniform(-5, 5)
+        return max(0, energy_produced)
+
     def update_temperature(self):
-        """Update core temperature based on avg rod position"""
         average_rod_depth = sum(self.reactor.rods) / self.reactor.num_rods
         reactivity = average_rod_depth / self.reactor.max_rod_depth
         self.reactor.temperature = self.reactor.base_temperature + reactivity * self.reactor.heat_factor
@@ -264,6 +265,11 @@ class Game:
         for i in range(len(self.reactor.rods)):
             self.lower_rod(i, self.reactor.max_rod_depth)
             time.sleep(0.3)
+
+    def change_power_plant_state(self):
+        """Toggle the power plant state between on and off"""
+        self.power_plant_on = not self.power_plant_on
+        return self.power_plant_on
 
     def raise_rod(self, rod_index, raise_amount):
         """Raise a rod to increase reactivity"""

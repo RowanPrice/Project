@@ -41,9 +41,6 @@ def state():
         "science": {
             "enriched_fuel": centre["enriched_fuel"],
             "unenriched_fuel": centre["unenriched_fuel"],
-            "enrichment_level": centre["enrichment_level"],
-            "quality_level": centre["quality_level"],
-            "speed_level": centre["speed_level"],
             "enrichment": enrichment,
             "upgrades": centre["upgrades"]
         },
@@ -132,6 +129,8 @@ def reactor_action(action):
             game.lower_rod(rod_index, 5)
     elif action == "scram":
         game.auto_scram()
+    elif action == "toggle_power_plant":
+        game.change_power_plant_state()
     if request.headers.get("X-Requested-With") == "XMLHttpRequest":
         update_game()
         return jsonify(state())
