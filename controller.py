@@ -14,6 +14,8 @@ class Game:
         self.science_centre = ScienceCentre()
         self.admin = Admin()
         self.money:int = 100000
+        self.energy_production:int = 0
+        self.energy_production_multiplier:float = 1.0
         self.enrichment_in_progress:bool = False
         self.enrichment_elapsed:int = 0
         self.enrichment_duration:int = 120
@@ -235,13 +237,12 @@ class Game:
             "upgrades": centre.upgrades
         }
 
-    def create_energy(self):
-        """Calculate energy produced based on core temperature"""
+    def update_energy(self):
         if not self.power_plant_on:
-            return 0
-        energy_produced = self.reactor.temperature * sum(self.reactor.rods) * 0.1
-        energy_produced += random.uniform(-5, 5)
-        return max(0, energy_produced)
+            self.energy_production = 0
+        else:
+            self.energy_production = self.energy_production_multiplier * self.reactor.temperature * (10**(self.reactor.temperature/self.reactor.meltdown_temperature))
+        
 
     def update_temperature(self):
         average_rod_depth = sum(self.reactor.rods) / self.reactor.num_rods
