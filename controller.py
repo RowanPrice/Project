@@ -168,8 +168,6 @@ class Game:
         return True
 
     def update_enrichment(self, elapsed_seconds:int):
-        if elapsed_seconds < 0:
-            raise ValueError("Elapsed time cannot be negative")
         if not self.enrichment_in_progress:
             return False
 
@@ -213,13 +211,6 @@ class Game:
         upgrade["purchased"] = True
         return True
 
-    def upgrade_centrifuge_quality(self):
-        centrifuge = self.science_centre.centrifuge
-        if centrifuge.quality_level >= centrifuge.max_level:
-            return 0
-        centrifuge.quality_level += 1
-        return centrifuge.quality_cost
-
     def upgrade_centrifuge_speed(self):
         centrifuge = self.science_centre.centrifuge
         if centrifuge.speed_level >= centrifuge.max_level:
@@ -241,8 +232,22 @@ class Game:
         if not self.power_plant_on:
             self.energy_production = 0
         else:
-            self.energy_production = self.energy_production_multiplier * self.reactor.temperature * (10**(self.reactor.temperature/self.reactor.meltdown_temperature))
-        
+            self.energy_production = self.energy_production_multiplier * self.reactor.temperature * (1+10**(self.reactor.temperature/self.reactor.meltdown_temperature))
+
+    def update_money(self, elapsed_seconds:int):
+        try:
+            if self.active_contract >= 0:
+                self.money += round(self.energy_production * self.admin.contracts[self.active_contract]["pay_per_watt"] * elapsed_seconds, 2)
+        except:
+            print("No active contract")
+
+    def update_current_contract(self, elapsed_seconds:int):
+        if self.active_contract is not None and 0 <= self.active_contract < len(self.admin.contracts):
+            self.admin.contracts[self.active_contract]["total_power_required"] = int(self.admin.contracts[self.active_contract]["total_power_required"]) - self.energy_production * elapsed_seconds
+            if self.admin.contracts[self.active_contract]["total_power_required"] <= 0:
+                self.money += self.admin.contracts[self.active_contract]["money_on_completion"]
+                self.admin.contracts[self.active_contract]["total_power_required"] = 0
+                self.active_contract = None
 
     def update_temperature(self):
         average_rod_depth = sum(self.reactor.rods) / self.reactor.num_rods
@@ -257,12 +262,13 @@ class Game:
             'temperature': round(self.reactor.temperature, 1),
             'rods': self.reactor.rods.copy(),
             'average_rod_depth': round(sum(self.reactor.rods) / self.reactor.num_rods, 1),
-            'current_rod': self.reactor.current_rod
+            'current_rod': self.reactor.current_rod,
+            'power_plant_on': self.power_plant_on,
+            'energy_production': self.energy_production
         }
 
     def auto_scram(self):
         print('Reactor temperature exceeded safe limits. Auto scram initiated')
-        time.sleep(1)
         for i in range(len(self.reactor.rods)):
             self.lower_rod(i, self.reactor.max_rod_depth)
             time.sleep(0.3)

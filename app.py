@@ -18,8 +18,13 @@ def update_game():
     last_update = now
     game.update_enrichment(elapsed)
     game.update_battery(elapsed)
+    game.update_energy()
+    game.update_current_contract(elapsed)
+    game.update_money(elapsed)
     if game.power_plant_on:
         game.update_temperature()
+    else:
+        game.auto_scram()
 
 def state():
     centre = game.get_centre_status()

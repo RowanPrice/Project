@@ -69,7 +69,7 @@
                 </div>
                 <span class="money">£{{ "{:,}".format(data.money) }}</span>
             </div>
-            <div class="metric-grid {% if not data.power_plant_on %}plant-off-state{% endif %}">
+            <div class="metric-grid">
                 <article class="metric-card">
                     <span>Core temperature</span>
                     <strong id="temperature">{{ data.reactor.temperature }}°C</strong>
@@ -202,8 +202,8 @@
                     {% for contract in data.administration.contracts %}
                     <article class="contract-row">
                         <div><p class="eyebrow">CONTRACT {{ "%02d"|format(loop.index) }}</p><h3>{{ contract.title }}</h3><p>{{ contract.description }}</p></div>
-                        <strong>£{{ "%.2f"|format(contract.pay_per_watt) }} / W<br><small>{{ "{:,.0f}".format(contract.total_power_required) }} MW · {{ contract.time_to_complete }} min</small></strong>
-                        <button type="button" class="primary-button contract-info-button" data-contract="{{ loop.index0 }}" data-active="{{ data.administration.active_contract == loop.index0 }}" data-title="{{ contract.title }}" data-pay="£{{ "%.2f"|format(contract.pay_per_watt) }} per watt" data-power="{{ "{:,.0f}".format(contract.total_power_required) }} MW total power required" data-time="{{ contract.time_to_complete }} minutes to complete" data-description="{{ contract.description }}">Info</button>
+                        <strong>£{{ "%.2f"|format(contract.pay_per_watt) }} / W<br><small>{{ "{:,.0f}".format(contract.total_power_required/100) }} MW · £{{ contract.money_on_completion }} when done</small></strong>
+                        <button type="button" class="primary-button contract-info-button" data-contract="{{ loop.index0 }}" data-active="{{ data.administration.active_contract == loop.index0 }}" data-title="{{ contract.title }}" data-pay="£{{ "%.2f"|format(contract.pay_per_watt) }} per watt" data-power="{{ "{:,.0f}".format(contract.total_power_required/100) }} MW total power required" data-completion="£{{ contract.money_on_completion }} on completion" data-description="{{ contract.description }}">Info</button>
                     </article>
                     {% endfor %}
                 </div>
@@ -220,7 +220,7 @@
             <h2 id="contract-info-title"></h2>
             <p class="contract-info-pay" id="contract-info-pay"></p>
             <p class="contract-info-power" id="contract-info-power"></p>
-            <p class="contract-info-time" id="contract-info-time"></p>
+            <p class="contract-info-completion" id="contract-info-completion"></p>
             <p class="contract-info-description" id="contract-info-description"></p>
             <form id="contract-start-form" class="contract-start-form" action="{{ url_for('start_contract') }}" method="post">
                 <input id="contract-info-index" type="hidden" name="contract" value="">
