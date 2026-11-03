@@ -9,4 +9,4 @@
 * go back to the map and then go to the administrative building
 * select a contract
 * your energy will start going towards the contract, generating you money
-* use the money to buy upgrades and such
+* use the money to buy upgrades
