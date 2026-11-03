@@ -20,7 +20,8 @@ def update_game():
     game.update_battery(elapsed)
     game.update_energy()
     game.update_current_contract(elapsed)
-    game.update_money(elapsed)
+    if game.battery.mode is None:
+        game.update_money(elapsed)
     if game.power_plant_on:
         game.update_temperature()
     elif game.auto_scrammed_recently:

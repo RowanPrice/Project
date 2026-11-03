@@ -2,7 +2,7 @@
 - [ ] add docstrings
 - [ ] sprites
 - [ ] add hiring
-- [ ] battery charging off of power
+- [x] battery charging off of power
 - [ ] display current power generation
 - [ ] make heat increase tend to a point
 - [ ] decide on the economy scale
