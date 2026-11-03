@@ -254,7 +254,7 @@ class Game:
         average_rod_depth = sum(self.reactor.rods) / self.reactor.num_rods
         reactivity = average_rod_depth / self.reactor.max_rod_depth
         self.reactor.temperature = self.reactor.base_temperature + reactivity * self.reactor.heat_factor
-        self.reactor.temperature += random.uniform(-2, 2)
+        self.reactor.temperature += random.uniform(-0.5, 0.5)
         if self.reactor.temperature > self.reactor.auto_scram_temperature and self.reactor.auto_scram == True:
             return(True)
 
