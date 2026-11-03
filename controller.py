@@ -271,7 +271,6 @@ class Game:
         print('Reactor temperature exceeded safe limits. Auto scram initiated')
         for i in range(len(self.reactor.rods)):
             self.lower_rod(i, self.reactor.max_rod_depth)
-            time.sleep(0.3)
 
     def change_power_plant_state(self):
         """Toggle the power plant state between on and off"""
