@@ -1,5 +1,5 @@
 class Reactor:
-    def __init__(self, initial_temperature=20, num_rods=5, max_rod_depth=100, auto_scram_temperature=1000 , auto_scram=True, cold_shutdown_temperature=93, meltdown_temperature=2700):
+    def __init__(self, initial_temperature=0, num_rods=5, max_rod_depth=100, auto_scram_temperature=1000 , auto_scram=True, cold_shutdown_temperature=93, meltdown_temperature=2700):
         self.temperature = initial_temperature
         self.rods = [0] * num_rods  # 0 = fully inserted, max_rod_depth = fully withdrawn
         self.max_rod_depth = max_rod_depth

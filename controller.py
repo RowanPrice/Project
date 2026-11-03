@@ -21,6 +21,7 @@ class Game:
         self.enrichment_duration:int = 120
         self.fuel_price:int = 10
         self.active_contract = None
+        self.auto_scrammed_recently = False
 
     # Battery controls
     def select_battery_mode(self, mode:str):
@@ -271,6 +272,7 @@ class Game:
         print('Reactor temperature exceeded safe limits. Auto scram initiated')
         for i in range(len(self.reactor.rods)):
             self.lower_rod(i, self.reactor.max_rod_depth)
+            self.auto_scrammed_recently = True
 
     def change_power_plant_state(self):
         """Toggle the power plant state between on and off"""
