@@ -64,11 +64,11 @@ class Game:
             return 0
 
         if self.battery.mode == "charging":
-            rate = self.battery.max_charge_rate
+            rate = min(self.battery.max_charge_rate, self.energy_production)
         else:
             rate = self.battery.max_discharge_rate
 
-        amount = rate * (self.battery.rate_percentage / 100) * elapsed_seconds
+        amount = rate * elapsed_seconds
         if self.battery.mode == "charging":
             changed = self.add_battery_charge(amount)
             self.battery._status_time += elapsed_seconds
@@ -233,7 +233,7 @@ class Game:
         if not self.power_plant_on:
             self.energy_production = 0
         else:
-            self.energy_production = self.energy_production_multiplier * self.reactor.temperature * (1+10**(self.reactor.temperature/self.reactor.meltdown_temperature))
+            self.energy_production = 1000 * self.energy_production_multiplier * self.reactor.temperature * (1+10**(self.reactor.temperature/self.reactor.meltdown_temperature))
 
     def update_money(self, elapsed_seconds:int):
         try:
