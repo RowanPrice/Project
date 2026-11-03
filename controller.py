@@ -20,7 +20,7 @@ class Game:
         self.enrichment_elapsed:int = 0
         self.enrichment_duration:int = 120
         self.fuel_price:int = 10
-        self.active_contract = None
+        self.active_contract = -1
         self.auto_scrammed_recently = False
 
     # Battery controls
@@ -57,7 +57,17 @@ class Game:
             raise ValueError("Rate percentage must be between 0 and 100")
         self.battery.rate_percentage = percentage
 
-    def update_battery(self, elapsed_seconds):
+    def update_battery(self, elapsed_seconds:int) -> int:
+        """
+        if the battery's mode is charging or discharging, handle calling either of the applicable functions
+        Parameters
+        ----------
+        elapsed_seconds: time passed since last update
+
+        Returns
+        -------
+        changed: the amount the battery charged or discharged(this is what is returned during the functions; allowed)
+        """
         if elapsed_seconds < 0:
             raise ValueError("Elapsed time cannot be negative")
         if self.battery.mode is None:
@@ -179,6 +189,12 @@ class Game:
         return False
 
     def skip_enrichment(self):
+        """
+        checks if enrichment is going and if it is, skip the duration
+
+        Returns
+        -------
+        """
         if not self.enrichment_in_progress:
             return False
         self.enrichment_elapsed = self.enrichment_duration
@@ -230,12 +246,30 @@ class Game:
         }
 
     def update_energy(self):
+        """
+        if the power plant is off, energy is set to 0. if it is on energy is calculated and set by a formula
+
+        Returns
+        -------
+
+        """
         if not self.power_plant_on:
             self.energy_production = 0
         else:
             self.energy_production = 1000 * self.energy_production_multiplier * self.reactor.temperature * (1+10**(self.reactor.temperature/self.reactor.meltdown_temperature))
 
     def update_money(self, elapsed_seconds:int):
+        """
+        adds money based on current energy output and pay per watt for the current contract
+
+        Parameters
+        ----------
+        elapsed_seconds: time since last update
+
+        Returns
+        -------
+
+        """
         try:
             if self.active_contract >= 0:
                 self.money += round(self.energy_production * self.admin.contracts[self.active_contract]["pay_per_watt"] * elapsed_seconds, 2)
@@ -243,14 +277,34 @@ class Game:
             print("No active contract")
 
     def update_current_contract(self, elapsed_seconds:int):
-        if self.active_contract is not None and 0 <= self.active_contract < len(self.admin.contracts):
+        """
+        updates the contracts power required and pays out the money on completion after the power requirements are filled
+
+        Parameters
+        ----------
+            elapsed_seconds: int
+                time since last update
+
+        Returns
+        -------
+
+        """
+        if self.active_contract is not -1 and 0 <= self.active_contract < len(self.admin.contracts):
             self.admin.contracts[self.active_contract]["total_power_required"] = int(self.admin.contracts[self.active_contract]["total_power_required"]) - self.energy_production * elapsed_seconds
             if self.admin.contracts[self.active_contract]["total_power_required"] <= 0:
                 self.money += self.admin.contracts[self.active_contract]["money_on_completion"]
                 self.admin.contracts[self.active_contract]["total_power_required"] = 0
-                self.active_contract = None
+                self.active_contract = -1
 
     def update_temperature(self):
+        """
+        updates temperatures based on average depth
+
+        Returns
+        -------
+            bool
+                returns true if the reactor should auto scram
+        """
         average_rod_depth = sum(self.reactor.rods) / self.reactor.num_rods
         reactivity = average_rod_depth / self.reactor.max_rod_depth
         self.reactor.temperature = self.reactor.base_temperature + reactivity * self.reactor.heat_factor
@@ -259,6 +313,13 @@ class Game:
             return(True)
 
     def get_status(self):
+        """
+        gets reactor status
+
+        Returns
+        -------
+
+        """
         return {
             'temperature': round(self.reactor.temperature, 1),
             'rods': self.reactor.rods.copy(),
@@ -269,6 +330,13 @@ class Game:
         }
 
     def auto_scram(self):
+        """
+        forcefully lowers all rods to their maximum depth to lower the reactor temperature
+
+        Returns
+        -------
+
+        """
         print('Reactor temperature exceeded safe limits. Auto scram initiated')
         for i in range(len(self.reactor.rods)):
             self.lower_rod(i, self.reactor.max_rod_depth)

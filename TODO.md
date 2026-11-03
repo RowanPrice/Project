@@ -7,3 +7,6 @@
 - [ ] make heat increase tend to a point
 - [ ] decide on the economy scale
 - [ ] add (dis)charging percentage slider
+- [ ] workers have continuous salary
+- [ ] gradual raising + lowering of rods when scramming and stuff
+- [ ] enrichment

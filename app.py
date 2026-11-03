@@ -24,7 +24,7 @@ def update_game():
         game.update_money(elapsed)
     if game.power_plant_on:
         game.update_temperature()
-    elif game.auto_scrammed_recently:
+    elif not game.auto_scrammed_recently:
         game.auto_scram()
 
 def state():
