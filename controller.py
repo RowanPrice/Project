@@ -343,7 +343,14 @@ class Game:
             self.auto_scrammed_recently = True
 
     def change_power_plant_state(self):
-        """Toggle the power plant state between on and off"""
+        """
+        toggles the power plant mode
+
+        Returns
+        -------
+            bool
+                whether the power plant mode is on
+        """
         self.power_plant_on = not self.power_plant_on
         return self.power_plant_on
 
