@@ -6,3 +6,4 @@
 - [ ] display current power generation
 - [ ] make heat increase tend to a point
 - [ ] decide on the economy scale
+- [ ] add (dis)charging percentage slider
