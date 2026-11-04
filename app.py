@@ -28,7 +28,7 @@ def update_game():
         game.auto_scram()
 
 def state():
-    centre = game.get_centre_status()
+    centre = game.get_center_status()
     enrichment = game.get_enrichment_status()
     reactor = game.get_status()
     return {

@@ -30,7 +30,8 @@ class Game:
 
         Parameters
         ----------
-        mode: mode for the battery to be changed to - either charging or discharging
+            mode: str
+                mode for the battery to be changed to - either charging or discharging
 
         Returns
         -------
@@ -47,7 +48,8 @@ class Game:
 
         Parameters
         ----------
-        percentage: percentage to charge at
+            percentage: int
+                percentage to charge at
 
         Returns
         -------
@@ -60,13 +62,16 @@ class Game:
     def update_battery(self, elapsed_seconds:int) -> int:
         """
         if the battery's mode is charging or discharging, handle calling either of the applicable functions
+
         Parameters
         ----------
-        elapsed_seconds: time passed since last update
+            elapsed_seconds: int
+                time passed since last update
 
         Returns
         -------
-        changed: the amount the battery charged or discharged(this is what is returned during the functions; allowed)
+            changed: int
+                the amount the battery charged or discharged(this is what is returned during the functions; allowed)
         """
         if elapsed_seconds < 0:
             raise ValueError("Elapsed time cannot be negative")
@@ -99,11 +104,13 @@ class Game:
 
         Parameters
         ----------
-        amount: amount of charge to be added to the battery
+            amount: int
+                amount of charge to be added to the battery
 
         Returns
         -------
-        allowed: amount of charge that has been added to the battery
+            allowed: int
+                amount of charge that has been added to the battery
         """
         if amount < 0:
             raise ValueError("Amount cannot be negative")
@@ -117,11 +124,13 @@ class Game:
 
         Parameters
         ----------
-        amount: amount of charge to be removed from the battery
+            amount: int
+                amount of charge to be removed from the battery
 
         Returns
         -------
-        allowed: amount of charge removed from the battery
+            allowed: int
+                amount of charge removed from the battery
         """
         if amount < 0:
             raise ValueError("Amount cannot be negative")
@@ -131,7 +140,11 @@ class Game:
 
     def recharge_battery(self):
         """
-        Fully recharges battery
+        sets battery charge to its maximum
+
+        Returns
+        -------
+
         """
         self.battery.current_charge = self.battery.capacity
 
@@ -141,11 +154,13 @@ class Game:
 
         Parameters
         ----------
-        amount: amount of fuel to be purchased
+            amount: int
+                amount of fuel to be purchased
 
         Returns
         -------
-        True
+            bool
+                returns false if cannot buy fuel, returns true otherwise
         """
         if amount <= 0 or self.money < amount * self.fuel_price:
             return False
@@ -159,12 +174,13 @@ class Game:
 
         Parameters
         ----------
-        fuel_amount: amount of fuel to be enriched
+            fuel_amount: int
+                amount of fuel to be enriched
 
         Returns
         -------
-        True: if the enrichment can be started
-        False: if the enrichment cannot be started
+            bool
+                false if the enrichment cannot be started, true otherwise
         """
         if self.enrichment_in_progress:
             return False
@@ -179,6 +195,19 @@ class Game:
         return True
 
     def update_enrichment(self, elapsed_seconds:int):
+        """
+        updates the enrichment duration and stops it if time is up
+
+        Parameters
+        ----------
+            elapsed_seconds: int
+                time since last update
+
+        Returns
+        -------
+            bool
+                if enrichment is over return true, return false otherwise
+        """
         if not self.enrichment_in_progress:
             return False
 
@@ -194,6 +223,8 @@ class Game:
 
         Returns
         -------
+            bool
+                returns false if enrichment is not happening, returns true otherwise
         """
         if not self.enrichment_in_progress:
             return False
@@ -216,6 +247,19 @@ class Game:
         }
 
     def purchase_upgrade(self, category_name, upgrade_name):
+        """
+
+
+        Parameters
+        ----------
+            category_name
+            upgrade_name
+
+        Returns
+        -------
+            bool
+                returns false if upgrade can't be purchased for whatever reason, returns true otherwise
+        """
         upgrades = self.science_centre.upgrades
         if category_name not in upgrades or upgrade_name not in upgrades[category_name]:
             return False
@@ -228,14 +272,15 @@ class Game:
         upgrade["purchased"] = True
         return True
 
-    def upgrade_centrifuge_speed(self):
-        centrifuge = self.science_centre.centrifuge
-        if centrifuge.speed_level >= centrifuge.max_level:
-            return 0
-        centrifuge.speed_level += 1
-        return centrifuge.speed_cost
+    def get_center_status(self):
+        """
+        gets the center status of the centrifuge
 
-    def get_centre_status(self):
+        Returns
+        -------
+            dict
+                collection of science center attributes
+        """
         centre = self.science_centre
         centrifuge = centre.centrifuge
         return {
@@ -298,7 +343,7 @@ class Game:
 
     def update_temperature(self):
         """
-        updates temperatures based on average depth
+        updates temperatures based on reactivity
 
         Returns
         -------
@@ -318,7 +363,8 @@ class Game:
 
         Returns
         -------
-
+            dict
+                collection of reactor attributes
         """
         return {
             'temperature': round(self.reactor.temperature, 1),
@@ -354,8 +400,21 @@ class Game:
         self.power_plant_on = not self.power_plant_on
         return self.power_plant_on
 
-    def raise_rod(self, rod_index, raise_amount):
-        """Raise a rod to increase reactivity"""
+    def raise_rod(self, rod_index:int, raise_amount:int):
+        """
+        raise a rod to increase reactivity
+
+        Parameters
+        ----------
+            rod_index: int
+                the index of the rod to be raised
+            raise_amount: int
+                the amount the rod should be raised
+
+        Returns
+        -------
+
+        """
         if 0 <= rod_index < self.reactor.num_rods:
             if self.reactor.rods[rod_index]+raise_amount <= self.reactor.max_rod_depth:
                 self.reactor.rods[rod_index] += raise_amount
@@ -365,8 +424,21 @@ class Game:
                 self.reactor.rods[rod_index] = self.reactor.max_rod_depth
                 print(f"Rod {rod_index} raised to depth {self.reactor.max_rod_depth}")
 
-    def lower_rod(self, rod_index, lower_amount):
-        """Lower a rod to decrease reactivity"""
+    def lower_rod(self, rod_index:int, lower_amount:int):
+        """
+        lowers a rod to decrease reactivity
+
+        Parameters
+        ----------
+            rod_index: int
+                the index of the rod to be raised
+            lower_amount: int
+                the amount the rod should be raised
+
+        Returns
+        -------
+
+        """
         if 0 <= rod_index and rod_index < self.reactor.num_rods:
             if self.reactor.rods[rod_index]-lower_amount >= 0:
                 self.reactor.rods[rod_index] -= lower_amount
