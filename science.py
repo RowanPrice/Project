@@ -2,36 +2,44 @@ class Centrifuge:
     def __init__(self):
         self.time_per_fuel = 1.2
         self.speed_multiplier = 0
-        #self.quality_level = 1
-        #self.speed_level = 1
-        #self.quality_cost = 500
-        #self.speed_cost = 300
-        #self.max_level = 10
-        #self.max_multiplier = 1.5
-
 
 class ScienceCenter:
     def __init__(self):
         self.upgrades = {
             "Reactor Systems": {
-                "Advanced Reactor": {"cost": 5000, "effect": "Increases base heat factor by 20%", "purchased": False},
-                "Backup Generators": {"cost": 3000, "effect": "Prevents reactor shutdown during power loss", "purchased": False},
-                "Safety Systems": {"cost": 4000, "effect": "Reduces meltdown risk by 30%", "purchased": False}
+                "Advanced Reactor": {"cost": 1, "effect": "Increases base heat factor by 20%", "purchased": False},
+                "Backup Generators": {"cost": 1, "effect": "Fuel lasts longer", "purchased": False},
             },
-            "Cooling Systems": {
-                "Enhanced Cooling": {"cost": 2500, "effect": "Reduces core temperature by 50°C", "purchased": False},
-                "Passive Cooling": {"cost": 1500, "effect": "Slowly cools reactor when idle", "purchased": False},
-                "Liquid Helium System": {"cost": 6000, "effect": "reduces temperature by 100°C", "purchased": False}
+            "Energy Systems": {
+                "Improved Turbines": {"cost": 1, "effect": "Increases energy production by 10%", "purchased": False},
+                "Passive Cooling": {"cost": 1, "effect": "Slowly cools reactor when idle", "purchased": False},
+                "Liquid Helium System": {"cost": 1, "effect": "reduces temperature by 100°C", "purchased": False}
             },
-            "Infrastructure": {
-                "Security System": {"cost": 4000, "effect": "Protects facility from sabotage", "purchased": False},
-                "Research Lab": {"cost": 6000, "effect": "Enables advanced fuel research", "purchased": False},
-                "Control Room Upgrade": {"cost": 3500, "effect": "Better monitoring capabilities", "purchased": False}
+            "Contract Systems": {
+                "Increased Reputation": {"cost": 1, "effect": "Better paying contracts are more likely to appear", "purchased": False},
+                "Grateful Companies": {"cost": 1, "effect": "Payment on contract completion increased by 15%", "purchased": False},
+                "Better connections": {"cost": 1, "effect": "Better paying contracts are more likely to appear", "purchased": False}
             },
-            "Enrichment": {
-                "Centrifuge Efficiency": {"cost": 2000, "effect": "Improves centrifuge base efficiency", "purchased": False},
-                "Advanced Filtration": {"cost": 3500, "effect": "Better uranium separation", "purchased": False},
-                "High-Speed Centrifuge": {"cost": 5500, "effect": "Significantly faster enrichment", "purchased": False}
+            "Hiring Systems": {
+                "Enhanced Cooling": {"cost": 1, "effect": "Reduces core temperature by 50°C", "purchased": False},
+                "Passive Cooling": {"cost": 1, "effect": "Slowly cools reactor when idle", "purchased": False},
+                "Liquid Helium System": {"cost": 1, "effect": "reduces temperature by 100°C", "purchased": False}
+            },
+            "Safety Systems": {
+                "Better control rods": {"cost": 1, "effect": "Control rods lower temperature faster", "purchased": False},
+                "Stronger Heat Containment": {"cost": 1, "effect": "Slightly increases the meltdown temperature", "purchased": False},
+                "Auto Scram System": {"cost": 1, "effect": "Automatically lowers the control rods when you would otherwise meltdown", "purchased": False}
+            },
+            "Battery Systems": {
+                "More Capacitors": {"cost": 1, "effect": "Charge and discharge speed increased", "purchased": False},
+                "Battery Slider": {"cost": 1, "effect": "Allow percentage slider for charging/discharging", "purchased": False},
+                "Burst Discharge": {"cost": 1,"effect": "A", "purchased": False}
+            },
+            "Enrichment Systems": {
+                "Centrifuge Efficiency": {"cost": 1, "effect": "Improves centrifuge speed", "purchased": False},
+                "Advanced Filtration": {"cost": 1, "effect": "More enriched fuel is produced", "purchased": False},
+                "High-Speed Centrifuge": {"cost": 1, "effect": "Significantly faster enrichment", "purchased": False},
+                "Light-Speed Centrifuge": {"cost": 1, "effect": "Enrichment is instant", "purchased": False}
             }
         }
         self.enriched_fuel = 0
