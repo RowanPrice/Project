@@ -6,7 +6,7 @@
 - [ ] display current power generation
 - [ ] make heat increase tend to a point
 - [ ] decide on the economy scale
-- [ ] add (dis)charging percentage slider
+- [ ] add (dis)charging percentage slider - (now an upgrade)
 - [ ] workers have continuous salary
 - [ ] gradual raising + lowering of rods when scramming and stuff
 - [ ] enrichment
