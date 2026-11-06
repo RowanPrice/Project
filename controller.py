@@ -1,27 +1,61 @@
 from nuclear import Reactor
 from battery import Battery
-from science import ScienceCentre
+from science import ScienceCenter
 from science import Centrifuge
 from administrative import Admin
 import random
 import time
 
 class Game:
+    """
+    Class to manage game state
+
+    Attributes
+    ----------
+        reactor
+            creates the reactor class
+        power_plant_on
+            whether the power plant is on, allowing energy to be made and control rods to be moved
+        battery
+            creates the battery class
+        science_center
+            creates the science center class
+        admin
+            creates the admin class
+        money
+            the amount of money the user has available
+        energy_production
+            users current energy production, based off of the reactor temperature and the users energy production multiplier
+        energy_production_multiplier
+            users energy production multiplier, based off of their upgrades
+        enrichment_in_progress
+            whether enrichment is currently in progress
+        enrichment_elapsed
+            the time elapsed during current enrichment
+        enrichment_duration
+            the time that needs to be elapsed for enrichment to stop
+        fuel_price
+            price per unit of unenriched fuel
+        active_contract
+            index of the current active contract, -1 if no contract is active
+        scrammed_recently
+            whether the plant has scrammed recently; this exists as scram is used to lower the rods when the plant is off and dont want constant scramming
+    """
     def __init__(self):
         self.reactor = Reactor()
         self.power_plant_on:bool = True
         self.battery = Battery(1000000, charge_rate=100000, discharge_rate=80000)
-        self.science_centre = ScienceCentre()
+        self.science_center = ScienceCenter()
         self.admin = Admin()
         self.money:int = 100000
         self.energy_production:int = 0
         self.energy_production_multiplier:float = 1.0
         self.enrichment_in_progress:bool = False
-        self.enrichment_elapsed:int = 0
-        self.enrichment_duration:int = 120
-        self.fuel_price:int = 10
+        self.enrichment_elapsed:int|float = 0
+        self.enrichment_duration:int|float = 120
+        self.fuel_price:int = 1000
         self.active_contract = -1
-        self.auto_scrammed_recently = False
+        self.scrammed_recently = False
 
     # Battery controls
     def select_battery_mode(self, mode:str):
@@ -59,7 +93,7 @@ class Game:
             raise ValueError("Rate percentage must be between 0 and 100")
         self.battery.rate_percentage = percentage
 
-    def update_battery(self, elapsed_seconds:int) -> int:
+    def update_battery(self, elapsed_seconds:int|float) -> int|float:
         """
         if the battery's mode is charging or discharging, handle calling either of the applicable functions
 
@@ -98,7 +132,7 @@ class Game:
                 self.battery.mode = None
         return changed
 
-    def add_battery_charge(self, amount:int) -> int:
+    def add_battery_charge(self, amount:int|float) -> int|float:
         """
         Adds charge to the battery, cannot go over capacity
 
@@ -118,7 +152,7 @@ class Game:
         self.battery.current_charge += allowed
         return allowed
 
-    def use_battery_charge(self, amount:int) -> int:
+    def use_battery_charge(self, amount:int|float) -> int|float:
         """
         Removes charge from the battery, cannot go into negative
 
@@ -160,12 +194,12 @@ class Game:
         Returns
         -------
             bool
-                returns false if cannot buy fuel, returns true otherwise
+                returns false if user cannot buy fuel, returns true otherwise
         """
         if amount <= 0 or self.money < amount * self.fuel_price:
             return False
         self.money -= amount * self.fuel_price
-        self.science_centre.unenriched_fuel += amount
+        self.science_center.unenriched_fuel += amount
         return True
 
     def start_enrichment(self, fuel_amount:int=100) -> bool:
@@ -184,23 +218,23 @@ class Game:
         """
         if self.enrichment_in_progress:
             return False
-        if fuel_amount <= 0 or fuel_amount > self.science_centre.unenriched_fuel:
+        if fuel_amount <= 0 or fuel_amount > self.science_center.unenriched_fuel:
             return False
 
-        centrifuge = self.science_centre.centrifuge
+        centrifuge = self.science_center.centrifuge
         self.enrichment_duration = (centrifuge.time_per_fuel * fuel_amount) / 1 + fuel_amount*0.005 + centrifuge.speed_multiplier
         self.enrichment_elapsed = 0
-        self.science_centre.unenriched_fuel -= fuel_amount
+        self.science_center.unenriched_fuel -= fuel_amount
         self.enrichment_in_progress = True
         return True
 
-    def update_enrichment(self, elapsed_seconds:int):
+    def update_enrichment(self, elapsed_seconds:int|float):
         """
         updates the enrichment duration and stops it if time is up
 
         Parameters
         ----------
-            elapsed_seconds: int
+            elapsed_seconds: int|float
                 time since last update
 
         Returns
@@ -248,19 +282,21 @@ class Game:
 
     def purchase_upgrade(self, category_name, upgrade_name):
         """
-
+        purchases upgrades if user hasn't already purchased them and they have enough money
 
         Parameters
         ----------
-            category_name
-            upgrade_name
+            category_name: str
+                category of upgrade to be purchased from
+            upgrade_name: str
+                name of the upgrade to be purchased
 
         Returns
         -------
             bool
                 returns false if upgrade can't be purchased for whatever reason, returns true otherwise
         """
-        upgrades = self.science_centre.upgrades
+        upgrades = self.science_center.upgrades
         if category_name not in upgrades or upgrade_name not in upgrades[category_name]:
             return False
         upgrade = upgrades[category_name][upgrade_name]
@@ -281,7 +317,7 @@ class Game:
             dict
                 collection of science center attributes
         """
-        centre = self.science_centre
+        centre = self.science_center
         centrifuge = centre.centrifuge
         return {
             "enriched_fuel": centre.enriched_fuel,
@@ -303,13 +339,14 @@ class Game:
         else:
             self.energy_production = 1000 * self.energy_production_multiplier * self.reactor.temperature * (1+10**(self.reactor.temperature/self.reactor.meltdown_temperature))
 
-    def update_money(self, elapsed_seconds:int):
+    def update_money(self, elapsed_seconds:int|float):
         """
         adds money based on current energy output and pay per watt for the current contract
 
         Parameters
         ----------
-        elapsed_seconds: time since last update
+            elapsed_seconds: int|float
+                time since last update
 
         Returns
         -------
@@ -321,7 +358,7 @@ class Game:
         except:
             print("No active contract")
 
-    def update_current_contract(self, elapsed_seconds:int):
+    def update_current_contract(self, elapsed_seconds:int|float):
         """
         updates the contracts power required and pays out the money on completion after the power requirements are filled
 
@@ -353,9 +390,11 @@ class Game:
         average_rod_depth = sum(self.reactor.rods) / self.reactor.num_rods
         reactivity = average_rod_depth / self.reactor.max_rod_depth
         self.reactor.temperature = self.reactor.base_temperature + reactivity * self.reactor.heat_factor
-        self.reactor.temperature += random.uniform(-0.5, 0.5)
+        if self.power_plant_on:
+            self.reactor.temperature += random.uniform(-0.5, 0.5)
         if self.reactor.temperature > self.reactor.auto_scram_temperature and self.reactor.auto_scram == True:
-            return(True)
+            return True
+        return False
 
     def get_status(self):
         """
@@ -375,7 +414,7 @@ class Game:
             'energy_production': self.energy_production
         }
 
-    def auto_scram(self):
+    def scram(self):
         """
         forcefully lowers all rods to their maximum depth to lower the reactor temperature
 
@@ -386,7 +425,7 @@ class Game:
         print('Reactor temperature exceeded safe limits. Auto scram initiated')
         for i in range(len(self.reactor.rods)):
             self.lower_rod(i, self.reactor.max_rod_depth)
-            self.auto_scrammed_recently = True
+            self.scrammed_recently = True
 
     def change_power_plant_state(self):
         """
@@ -450,4 +489,4 @@ class Game:
 
 if __name__ == "__main__":
     reactor = Game()
-    reactor.auto_scram()
+    reactor.scram()

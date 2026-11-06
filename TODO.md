@@ -10,3 +10,4 @@
 - [ ] workers have continuous salary
 - [ ] gradual raising + lowering of rods when scramming and stuff
 - [ ] enrichment
+- [ ] make fuel required for using reactor

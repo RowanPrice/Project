@@ -10,7 +10,7 @@ class Centrifuge:
         #self.max_multiplier = 1.5
 
 
-class ScienceCentre:
+class ScienceCenter:
     def __init__(self):
         self.upgrades = {
             "Reactor Systems": {
@@ -21,7 +21,7 @@ class ScienceCentre:
             "Cooling Systems": {
                 "Enhanced Cooling": {"cost": 2500, "effect": "Reduces core temperature by 50°C", "purchased": False},
                 "Passive Cooling": {"cost": 1500, "effect": "Slowly cools reactor when idle", "purchased": False},
-                "Liquid Helium System": {"cost": 6000, "effect": "Ultra-efficient cooling, -100°C", "purchased": False}
+                "Liquid Helium System": {"cost": 6000, "effect": "reduces temperature by 100°C", "purchased": False}
             },
             "Infrastructure": {
                 "Security System": {"cost": 4000, "effect": "Protects facility from sabotage", "purchased": False},
