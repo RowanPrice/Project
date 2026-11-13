@@ -4,7 +4,7 @@ class Centrifuge:
         self.speed_multiplier = 0
 
 class ScienceCenter:
-    def __init__(self):
+    def __init__(self, enriched_fuel:int = 0, unenriched_fuel:int = 100, fuel_usage_rate:int = 1):
         self.upgrades = {
             "Reactor Systems": {
                 "Advanced Reactor": {"cost": 1, "effect": "Increases base heat factor by 20%", "purchased": False},
@@ -42,6 +42,7 @@ class ScienceCenter:
                 "Light-Speed Centrifuge": {"cost": 1, "effect": "Enrichment is instant", "purchased": False}
             }
         }
-        self.enriched_fuel = 0
-        self.unenriched_fuel = 100
+        self.enriched_fuel = enriched_fuel
+        self.unenriched_fuel = unenriched_fuel
+        self.fuel_usage_rate = fuel_usage_rate
         self.centrifuge = Centrifuge()

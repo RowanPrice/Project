@@ -1,5 +1,5 @@
 class Reactor:
-    def __init__(self, initial_temperature=22, num_rods=5, max_rod_depth=100, auto_scram_temperature=1000 , auto_scram=True, cold_shutdown_temperature=93, meltdown_temperature=2700):
+    def __init__(self, initial_temperature=22, num_rods=5, max_rod_depth=100, auto_scram_temperature=1000 , auto_scram=True, cold_shutdown_temperature=93, meltdown_temperature=2700, required_fuel=100):
         self.temperature = initial_temperature
         self.rods = [0] * num_rods  # 0 = fully inserted, max_rod_depth = fully withdrawn
         self.max_rod_depth = max_rod_depth
@@ -11,3 +11,5 @@ class Reactor:
         self.meltdown_temperature = meltdown_temperature
         self.heat_factor = 1000 # How much temperature increases per unit of rod withdrawal
         self.current_rod = 0
+        self.required_fuel = required_fuel
+        self.temperature_penalty = 1

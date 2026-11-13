@@ -24,6 +24,7 @@ def update_game():
         game.update_money(elapsed)
     if game.power_plant_on:
         game.update_temperature()
+        game.update_fuel(elapsed)
     elif not game.scrammed_recently:
         game.scram()
 
@@ -134,7 +135,7 @@ def reactor_action(action):
         for rod_index in rod_indices:
             game.lower_rod(rod_index, 5)
     elif action == "scram":
-        game.auto_scram()
+        game.scram()
     elif action == "toggle_power_plant":
         game.change_power_plant_state()
     if request.headers.get("X-Requested-With") == "XMLHttpRequest":
@@ -157,7 +158,7 @@ def buy_fuel():
 def start_enrichment():
     amount = int(request.form.get("amount", 0))
     percentage = float(request.form.get("percentage", 4.5))
-    started = game.start_enrichment(amount, percentage)
+    started = game.start_enrichment(amount)
     if request.headers.get("X-Requested-With") == "XMLHttpRequest":
         update_game()
         response = state()

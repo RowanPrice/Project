@@ -120,10 +120,10 @@ class Game:
         amount = rate * elapsed_seconds
         if self.battery.mode == "charging":
             changed = self.add_battery_charge(amount)
-            self.battery._status_time += elapsed_seconds
-            while self.battery._status_time >= 1:
+            self.battery.status_time += elapsed_seconds
+            while self.battery.status_time >= 1:
                 print(f"Battery charge: {self.battery.current_charge:g}/{self.battery.capacity:g}")
-                self.battery._status_time -= 1
+                self.battery.status_time -= 1
             if self.battery.current_charge >= self.battery.capacity:
                 self.battery.mode = None
         else:
@@ -380,7 +380,7 @@ class Game:
 
     def update_temperature(self):
         """
-        updates temperatures based on reactivity
+        updates temperatures based on reactivity and whether the amount of enriched fuel is below the required amount for 100% efficiency
 
         Returns
         -------
@@ -389,12 +389,31 @@ class Game:
         """
         average_rod_depth = sum(self.reactor.rods) / self.reactor.num_rods
         reactivity = average_rod_depth / self.reactor.max_rod_depth
-        self.reactor.temperature = self.reactor.base_temperature + reactivity * self.reactor.heat_factor
+        self.reactor.temperature = (self.reactor.base_temperature + reactivity * self.reactor.heat_factor) * self.reactor.temperature_penalty
         if self.power_plant_on:
             self.reactor.temperature += random.uniform(-0.5, 0.5)
+        if self.science_center.enriched_fuel < self.reactor.required_fuel:
+            self.reactor.temperature_penalty = self.science_center.enriched_fuel/self.reactor.required_fuel
+        elif self.reactor.temperature_penalty < 1:
+            self.reactor.temperature_penalty = 1
         if self.reactor.temperature > self.reactor.auto_scram_temperature and self.reactor.auto_scram == True:
             return True
         return False
+
+    def update_fuel(self, elapsed_seconds:int|float):
+        """
+        removes fuel depending on the time passed
+
+        Parameters
+        ----------
+            elapsed_seconds: int
+                time since last update
+
+        Returns
+        -------
+
+        """
+        self.science_center.enriched_fuel -= elapsed_seconds * self.science_center.fuel_usage_rate
 
     def get_status(self):
         """

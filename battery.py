@@ -6,5 +6,5 @@ class Battery:
         self.max_discharge_rate = discharge_rate
         self.mode = None
         self.rate_percentage = 100
-        self._status_time = 0
+        self.status_time = 0
 
