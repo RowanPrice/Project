@@ -1,10 +1,8 @@
 from nuclear import Reactor
 from battery import Battery
 from science import ScienceCenter
-from science import Centrifuge
 from administrative import Admin
 import random
-import time
 
 class Game:
     """
@@ -56,6 +54,7 @@ class Game:
         self.fuel_price:int = 1000
         self.active_contract = -1
         self.scrammed_recently = False
+        self.average_rod_depth = 0
 
     # Battery controls
     def select_battery_mode(self, mode:str):
@@ -387,13 +386,16 @@ class Game:
             bool
                 returns true if the reactor should auto scram
         """
-        average_rod_depth = sum(self.reactor.rods) / self.reactor.num_rods
-        reactivity = average_rod_depth / self.reactor.max_rod_depth
+        self.average_rod_depth = sum(self.reactor.rods) / self.reactor.num_rods
+        reactivity = self.average_rod_depth / self.reactor.max_rod_depth
         self.reactor.temperature = (self.reactor.base_temperature + reactivity * self.reactor.heat_factor) * self.reactor.temperature_penalty
         if self.power_plant_on:
             self.reactor.temperature += random.uniform(-0.5, 0.5)
         if self.science_center.enriched_fuel < self.reactor.required_fuel:
             self.reactor.temperature_penalty = self.science_center.enriched_fuel/self.reactor.required_fuel
+            if self.science_center.enriched_fuel <= 0:
+                self.power_plant_on = False
+                self.science_center.enriched_fuel = 0
         elif self.reactor.temperature_penalty < 1:
             self.reactor.temperature_penalty = 1
         if self.reactor.temperature > self.reactor.auto_scram_temperature and self.reactor.auto_scram == True:
@@ -413,7 +415,7 @@ class Game:
         -------
 
         """
-        self.science_center.enriched_fuel -= elapsed_seconds * self.science_center.fuel_usage_rate
+        self.science_center.enriched_fuel -= round(elapsed_seconds * self.science_center.fuel_usage_rate * (self.average_rod_depth/100),0)
 
     def get_status(self):
         """

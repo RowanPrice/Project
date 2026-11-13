@@ -11,4 +11,4 @@
 - [ ] gradual raising + lowering of rods when scramming and stuff
 - [ ] enrichment
 - [ ] make fuel required for using reactor
-- [ ] move upgrades + contracts to their respective jsons
+- [ ] move upgrades + contracts to their respective JSONS

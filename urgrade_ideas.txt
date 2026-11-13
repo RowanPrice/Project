@@ -1,0 +1,2 @@
+increase required fuel cap
+reduce fuel amount loss
