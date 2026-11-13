@@ -478,7 +478,7 @@ class Game:
         -------
 
         """
-        if 0 <= rod_index and rod_index < self.reactor.num_rods:
+        if 0 <= rod_index < self.reactor.num_rods:
             if self.reactor.rods[rod_index]-lower_amount >= 0:
                 self.reactor.rods[rod_index] -= lower_amount
                 self.update_temperature()
