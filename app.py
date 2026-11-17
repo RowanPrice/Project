@@ -17,11 +17,13 @@ def update_game():
     elapsed = now - last_update
     last_update = now
     game.update_enrichment(elapsed)
-    game.update_battery(elapsed)
     game.update_energy()
-    game.update_current_contract(elapsed)
-    if game.battery.mode is None:
+    game.update_battery(elapsed)
+    if game.battery.mode != "charging":
         game.update_money(elapsed)
+    else:
+        game.update_money(elapsed,0)
+    game.update_current_contract(elapsed)
     if game.power_plant_on:
         game.update_temperature()
         game.update_fuel(elapsed)
@@ -53,7 +55,7 @@ def state():
         },
         "administration": {
             "active_contract": game.active_contract,
-            "contracts": game.admin.contracts
+            "contracts": game.contracts
         }
     }
 
@@ -89,7 +91,7 @@ def add_dev_money():
 @app.post("/administration/start-contract")
 def start_contract():
     contract_index = int(request.form.get("contract", -1))
-    if 0 <= contract_index < len(game.admin.contracts):
+    if 0 <= contract_index < len(game.contracts):
         game.active_contract = contract_index
     if request.headers.get("X-Requested-With") == "XMLHttpRequest":
         update_game()

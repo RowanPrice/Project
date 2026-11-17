@@ -2,7 +2,9 @@ from nuclear import Reactor
 from battery import Battery
 from science import ScienceCenter
 from administrative import Admin
+from pathlib import Path
 import random
+import json
 
 class Game:
     """
@@ -42,9 +44,10 @@ class Game:
     def __init__(self):
         self.reactor = Reactor()
         self.power_plant_on:bool = True
-        self.battery = Battery(1000000, charge_rate=100000, discharge_rate=80000)
+        self.battery = Battery(100000000, charge_rate=10000000, discharge_rate=8000000)
         self.science_center = ScienceCenter()
-        self.admin = Admin()
+        self.contracts = json.loads(Path("jsons/contracts.json").read_text(encoding="utf-8"))
+        self.upgrades = json.loads(Path("jsons/upgrades.json").read_text(encoding="utf-8"))
         self.money:int = 100000
         self.energy_production:int = 0
         self.energy_production_multiplier:float = 1.0
@@ -169,6 +172,7 @@ class Game:
             raise ValueError("Amount cannot be negative")
         allowed = min(amount, self.battery.current_charge)
         self.battery.current_charge -= allowed
+        self.energy_production += allowed
         return allowed
 
     def recharge_battery(self):
@@ -295,7 +299,7 @@ class Game:
             bool
                 returns false if upgrade can't be purchased for whatever reason, returns true otherwise
         """
-        upgrades = self.science_center.upgrades
+        upgrades = self.upgrades
         if category_name not in upgrades or upgrade_name not in upgrades[category_name]:
             return False
         upgrade = upgrades[category_name][upgrade_name]
@@ -322,7 +326,7 @@ class Game:
             "enriched_fuel": centre.enriched_fuel,
             "unenriched_fuel": centre.unenriched_fuel,
             "speed_multiplier": centrifuge.speed_multiplier,
-            "upgrades": centre.upgrades
+            "upgrades": self.upgrades
         }
 
     def update_energy(self):
@@ -338,7 +342,7 @@ class Game:
         else:
             self.energy_production = 1000 * self.energy_production_multiplier * self.reactor.temperature * (1+10**(self.reactor.temperature/self.reactor.meltdown_temperature))
 
-    def update_money(self, elapsed_seconds:int|float):
+    def update_money(self, elapsed_seconds:int|float, override=-1):
         """
         adds money based on current energy output and pay per watt for the current contract
 
@@ -352,8 +356,10 @@ class Game:
 
         """
         try:
-            if self.active_contract >= 0:
-                self.money += round(self.energy_production * self.admin.contracts[self.active_contract]["pay_per_watt"] * elapsed_seconds, 2)
+            if override == 0:
+                pass
+            elif self.active_contract >= 0:
+                self.money += round(self.energy_production * self.contracts[self.active_contract]["pay_per_watt"] * elapsed_seconds, 2)
         except:
             print("No active contract")
 
@@ -370,11 +376,11 @@ class Game:
         -------
 
         """
-        if self.active_contract is not -1 and 0 <= self.active_contract < len(self.admin.contracts):
-            self.admin.contracts[self.active_contract]["total_power_required"] = int(self.admin.contracts[self.active_contract]["total_power_required"]) - self.energy_production * elapsed_seconds
-            if self.admin.contracts[self.active_contract]["total_power_required"] <= 0:
-                self.money += self.admin.contracts[self.active_contract]["money_on_completion"]
-                self.admin.contracts[self.active_contract]["total_power_required"] = 0
+        if self.active_contract is not -1 and 0 <= self.active_contract < len(self.contracts):
+            self.contracts[self.active_contract]["total_power_required"] = int(self.contracts[self.active_contract]["total_power_required"]) - self.energy_production * elapsed_seconds
+            if self.contracts[self.active_contract]["total_power_required"] <= 0:
+                self.money += self.contracts[self.active_contract]["money_on_completion"]
+                self.contracts[self.active_contract]["total_power_required"] = 0
                 self.active_contract = -1
 
     def update_temperature(self):
