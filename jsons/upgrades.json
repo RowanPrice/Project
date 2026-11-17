@@ -2,120 +2,147 @@
   "Reactor Systems": {
     "Advanced Reactor": {
       "cost": 1,
-      "effect": "Increases base heat factor by 20%",
-      "purchased": false
-    },
+      "description": "Increases base heat factor by 20%",
+      "purchased": false,
+      "effect": "self.temperature_multiplier = self.temperature_multiplier*1.2"
+    }
+  },
+  "Fuel Upgrades": {
     "Backup Generators": {
       "cost": 1,
-      "effect": "Fuel lasts longer",
-      "purchased": false
+      "description": "Fuel lasts 20% longer",
+      "purchased": false,
+      "effect": "self.science_center.fuel_usage_rate = self.science_center.fuel_usage_rate * 0.8"
+    }
+  },
+  "Cooling Systems": {
+    "Liquid Helium System": {
+      "cost": 1,
+      "description": "reduces temperature by 100\u00b0C",
+      "purchased": false,
+      "effect": "self.temperature -= 100"
     }
   },
   "Energy Systems": {
     "Improved Turbines": {
       "cost": 1,
-      "effect": "Increases energy production by 10%",
-      "purchased": false
-    },
-    "Passive Cooling": {
-      "cost": 1,
-      "effect": "Slowly cools reactor when idle",
-      "purchased": false
-    },
-    "Liquid Helium System": {
-      "cost": 1,
-      "effect": "reduces temperature by 100\u00b0C",
-      "purchased": false
+      "description": "Increases energy production by 10%",
+      "purchased": false,
+      "effect": "self.energy_production_multiplier = self.energy_production_multiplier * 1.1"
     }
   },
   "Contract Systems": {
     "Increased Reputation": {
       "cost": 1,
-      "effect": "Better paying contracts are more likely to appear",
-      "purchased": false
+      "description": "Better paying contracts are more likely to appear",
+      "purchased": false,
+      "effect": -1
     },
     "Grateful Companies": {
       "cost": 1,
-      "effect": "Payment on contract completion increased by 15%",
-      "purchased": false
+      "description": "Payment on contract completion increased by 15%",
+      "purchased": false,
+      "effect": 1.15
     },
     "Better connections": {
       "cost": 1,
-      "effect": "Better paying contracts are more likely to appear",
-      "purchased": false
+      "description": "Better paying contracts are more likely to appear",
+      "purchased": false,
+      "effect": -1
     }
   },
   "Hiring Systems": {
-    "Enhanced Cooling": {
+    "Break Room": {
       "cost": 1,
-      "effect": "Reduces core temperature by 50\u00b0C",
-      "purchased": false
+      "description": "Worker salary reduced by 10%",
+      "purchased": false,
+      "effect": 0.9
     },
-    "Passive Cooling": {
+    "Union Buster": {
       "cost": 1,
-      "effect": "Slowly cools reactor when idle",
-      "purchased": false
+      "description": "Worker salary reduced by 20%",
+      "purchased": false,
+      "effect": 0.8
     },
-    "Liquid Helium System": {
+    "Better advertising": {
       "cost": 1,
-      "effect": "reduces temperature by 100\u00b0C",
-      "purchased": false
+      "description": "Better workers are more likely to appear",
+      "purchased": false,
+      "effect": -1
+    },
+    "Communism": {
+      "cost": 1,
+      "description": "Worker work for free",
+      "purchased": false,
+      "effect": 0
+    }
+  },
+  "Control Rod Systems": {
+    "Better control rods": {
+      "cost": 1,
+      "description": "Control rods lower temperature faster",
+      "purchased": false,
+      "effect": 1.2
     }
   },
   "Safety Systems": {
-    "Better control rods": {
-      "cost": 1,
-      "effect": "Control rods lower temperature faster",
-      "purchased": false
-    },
     "Stronger Heat Containment": {
       "cost": 1,
-      "effect": "Slightly increases the meltdown temperature",
-      "purchased": false
+      "description": "Slightly increases the meltdown temperature by 5%",
+      "purchased": false,
+      "effect": 1.05
     },
     "Auto Scram System": {
       "cost": 1,
-      "effect": "Automatically lowers the control rods when you would otherwise meltdown",
-      "purchased": false
+      "description": "Automatically lowers the control rods when you would otherwise meltdown",
+      "purchased": false,
+      "effect": -1
     }
   },
   "Battery Systems": {
     "More Capacitors": {
       "cost": 1,
-      "effect": "Charge and discharge speed increased",
-      "purchased": false
+      "description": "Charge and discharge speed increased by 10%",
+      "purchased": false,
+      "effect": 1.1
     },
     "Battery Slider": {
       "cost": 1,
-      "effect": "Allow percentage slider for charging/discharging",
-      "purchased": false
+      "description": "Allow percentage slider for charging/discharging",
+      "purchased": false,
+      "effect": 0
     },
     "Burst Discharge": {
       "cost": 1,
-      "effect": "A",
-      "purchased": false
+      "description": "Allows all stored energy to be discharged at once by double pressing discharge",
+      "purchased": false,
+      "effect": 0
     }
   },
   "Enrichment Systems": {
     "Centrifuge Efficiency": {
       "cost": 1,
-      "effect": "Improves centrifuge speed",
-      "purchased": false
+      "description": "Improves centrifuge speed by 10%",
+      "purchased": false,
+      "effect": 0.9
     },
     "Advanced Filtration": {
       "cost": 1,
-      "effect": "More enriched fuel is produced",
-      "purchased": false
+      "description": "10% more enriched fuel is produced",
+      "purchased": false,
+      "effect": 1.1
     },
     "High-Speed Centrifuge": {
       "cost": 1,
-      "effect": "Significantly faster enrichment",
-      "purchased": false
+      "description": "Significantly faster enrichment (30%)",
+      "purchased": false,
+      "effect": 0.7
     },
     "Light-Speed Centrifuge": {
       "cost": 1,
-      "effect": "Enrichment is instant",
-      "purchased": false
+      "description": "Enrichment is instant",
+      "purchased": false,
+      "effect": 0
     }
   }
 }

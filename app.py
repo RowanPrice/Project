@@ -1,9 +1,6 @@
 import time
-
 from flask import Flask, jsonify, redirect, render_template, request, send_from_directory, url_for
-
 from controller import Game
-
 import os
 
 app = Flask(__name__)
@@ -21,9 +18,10 @@ def update_game():
     game.update_battery(elapsed)
     if game.battery.mode != "charging":
         game.update_money(elapsed)
+        game.update_current_contract(elapsed)
     else:
         game.update_money(elapsed,0)
-    game.update_current_contract(elapsed)
+        game.update_current_contract(elapsed,0)
     if game.power_plant_on:
         game.update_temperature()
         game.update_fuel(elapsed)

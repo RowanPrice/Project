@@ -1,7 +1,6 @@
 from nuclear import Reactor
 from battery import Battery
 from science import ScienceCenter
-from administrative import Admin
 from pathlib import Path
 import random
 import json
@@ -20,8 +19,6 @@ class Game:
             creates the battery class
         science_center
             creates the science center class
-        admin
-            creates the admin class
         money
             the amount of money the user has available
         energy_production
@@ -58,6 +55,7 @@ class Game:
         self.active_contract = -1
         self.scrammed_recently = False
         self.average_rod_depth = 0
+        self.temperature_multiplier = 1
 
     # Battery controls
     def select_battery_mode(self, mode:str):
@@ -309,6 +307,7 @@ class Game:
             return False
         self.money -= upgrade["cost"]
         upgrade["purchased"] = True
+
         return True
 
     def get_center_status(self):
@@ -342,7 +341,7 @@ class Game:
         else:
             self.energy_production = 1000 * self.energy_production_multiplier * self.reactor.temperature * (1+10**(self.reactor.temperature/self.reactor.meltdown_temperature))
 
-    def update_money(self, elapsed_seconds:int|float, override=-1):
+    def update_money(self, elapsed_seconds:int|float, override:int=-1):
         """
         adds money based on current energy output and pay per watt for the current contract
 
@@ -350,6 +349,8 @@ class Game:
         ----------
             elapsed_seconds: int|float
                 time since last update
+            override: int
+                whether the money should be updated or not - used when battery is charging
 
         Returns
         -------
@@ -363,7 +364,7 @@ class Game:
         except:
             print("No active contract")
 
-    def update_current_contract(self, elapsed_seconds:int|float):
+    def update_current_contract(self, elapsed_seconds:int|float, override:int=-1):
         """
         updates the contracts power required and pays out the money on completion after the power requirements are filled
 
@@ -376,7 +377,9 @@ class Game:
         -------
 
         """
-        if self.active_contract is not -1 and 0 <= self.active_contract < len(self.contracts):
+        if override == 0:
+            pass
+        elif self.active_contract is not -1 and 0 <= self.active_contract < len(self.contracts):
             self.contracts[self.active_contract]["total_power_required"] = int(self.contracts[self.active_contract]["total_power_required"]) - self.energy_production * elapsed_seconds
             if self.contracts[self.active_contract]["total_power_required"] <= 0:
                 self.money += self.contracts[self.active_contract]["money_on_completion"]
@@ -394,7 +397,7 @@ class Game:
         """
         self.average_rod_depth = sum(self.reactor.rods) / self.reactor.num_rods
         reactivity = self.average_rod_depth / self.reactor.max_rod_depth
-        self.reactor.temperature = (self.reactor.base_temperature + reactivity * self.reactor.heat_factor) * self.reactor.temperature_penalty
+        self.reactor.temperature = (self.reactor.base_temperature + reactivity * self.reactor.heat_factor) * self.reactor.temperature_penalty * self.temperature_multiplier
         if self.power_plant_on:
             self.reactor.temperature += random.uniform(-0.5, 0.5)
         if self.science_center.enriched_fuel < self.reactor.required_fuel:
