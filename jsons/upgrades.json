@@ -1,0 +1,121 @@
+{
+  "Reactor Systems": {
+    "Advanced Reactor": {
+      "cost": 1,
+      "effect": "Increases base heat factor by 20%",
+      "purchased": false
+    },
+    "Backup Generators": {
+      "cost": 1,
+      "effect": "Fuel lasts longer",
+      "purchased": false
+    }
+  },
+  "Energy Systems": {
+    "Improved Turbines": {
+      "cost": 1,
+      "effect": "Increases energy production by 10%",
+      "purchased": false
+    },
+    "Passive Cooling": {
+      "cost": 1,
+      "effect": "Slowly cools reactor when idle",
+      "purchased": false
+    },
+    "Liquid Helium System": {
+      "cost": 1,
+      "effect": "reduces temperature by 100\u00b0C",
+      "purchased": false
+    }
+  },
+  "Contract Systems": {
+    "Increased Reputation": {
+      "cost": 1,
+      "effect": "Better paying contracts are more likely to appear",
+      "purchased": false
+    },
+    "Grateful Companies": {
+      "cost": 1,
+      "effect": "Payment on contract completion increased by 15%",
+      "purchased": false
+    },
+    "Better connections": {
+      "cost": 1,
+      "effect": "Better paying contracts are more likely to appear",
+      "purchased": false
+    }
+  },
+  "Hiring Systems": {
+    "Enhanced Cooling": {
+      "cost": 1,
+      "effect": "Reduces core temperature by 50\u00b0C",
+      "purchased": false
+    },
+    "Passive Cooling": {
+      "cost": 1,
+      "effect": "Slowly cools reactor when idle",
+      "purchased": false
+    },
+    "Liquid Helium System": {
+      "cost": 1,
+      "effect": "reduces temperature by 100\u00b0C",
+      "purchased": false
+    }
+  },
+  "Safety Systems": {
+    "Better control rods": {
+      "cost": 1,
+      "effect": "Control rods lower temperature faster",
+      "purchased": false
+    },
+    "Stronger Heat Containment": {
+      "cost": 1,
+      "effect": "Slightly increases the meltdown temperature",
+      "purchased": false
+    },
+    "Auto Scram System": {
+      "cost": 1,
+      "effect": "Automatically lowers the control rods when you would otherwise meltdown",
+      "purchased": false
+    }
+  },
+  "Battery Systems": {
+    "More Capacitors": {
+      "cost": 1,
+      "effect": "Charge and discharge speed increased",
+      "purchased": false
+    },
+    "Battery Slider": {
+      "cost": 1,
+      "effect": "Allow percentage slider for charging/discharging",
+      "purchased": false
+    },
+    "Burst Discharge": {
+      "cost": 1,
+      "effect": "A",
+      "purchased": false
+    }
+  },
+  "Enrichment Systems": {
+    "Centrifuge Efficiency": {
+      "cost": 1,
+      "effect": "Improves centrifuge speed",
+      "purchased": false
+    },
+    "Advanced Filtration": {
+      "cost": 1,
+      "effect": "More enriched fuel is produced",
+      "purchased": false
+    },
+    "High-Speed Centrifuge": {
+      "cost": 1,
+      "effect": "Significantly faster enrichment",
+      "purchased": false
+    },
+    "Light-Speed Centrifuge": {
+      "cost": 1,
+      "effect": "Enrichment is instant",
+      "purchased": false
+    }
+  }
+}

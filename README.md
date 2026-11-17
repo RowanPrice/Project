@@ -1,7 +1,6 @@
 # Power plant simulator
 
 ## How to run:
-* Go to app.py
 * run app.py
 * go to the server that pops up in the terminal
 * you will be taken to the map which shows all the buildings; click on the power plant
